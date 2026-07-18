@@ -3,6 +3,7 @@ import userRouter from "./modules/users/controller/users.controller.js";
 import authRouter from "./modules/auth/controller/auth.controller.js";
 import connectionMongoDB from "./db/connection.db.js";
 import messagesRouter from "./modules/messages/controller/messages.controller.js";
+import { globalErrorHandler } from "./lib/utils/response.js";
 export const bootstrap = () => {
   const app = express();
   const port = 3000;
@@ -32,7 +33,8 @@ export const bootstrap = () => {
   app.all("{/*dummy}", (req, res) => {
     res.status(404).json({ message: "route not found" });
   });
-
+  // error handler
+  app.use(globalErrorHandler);
   //   start the server
   app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
