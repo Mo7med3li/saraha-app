@@ -30,8 +30,7 @@ const userSchema = new Mongoose.Schema(
       minLength: [8, "Password must be at least 8 characters long"],
       maxLength: [20, "Password must be less than 20 characters long"],
     },
-  },
-  {
+
     gender: {
       type: String,
       enum: {
@@ -49,32 +48,28 @@ const userSchema = new Mongoose.Schema(
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-    virtuals: {
-      fullName: {
-        virtual: true,
-        get: function () {
-          return `${this.firstName} ${this.lastName}`;
-        },
-        set: function (value) {
-          const [firstName, lastName] = value.split(" ");
-          this.firstName = firstName;
-          this.lastName = lastName;
-        },
-      },
-    },
+    // virtuals: {
+    //   fullName: {
+    //     set: function () {
+    //       const [firstName, lastName] = this.get("fullName").split(" ");
+    //       this.firstName = firstName;
+    //       this.lastName = lastName;
+    //     },
+    //   },
+    // },
   },
 );
 
-// userSchema
-//   .virtual("fullName")
-//   .set(function (value) {
-//     const [firstName, lastName] = value.split(" ");
-//     this.firstName = firstName;
-//     this.lastName = lastName;
-//   })
-//   .get(function () {
-//     return `${this.firstName} ${this.lastName}`;
-//   });
+userSchema
+  .virtual("userName")
+  .set(function (value) {
+    const [firstName, lastName] = value.split(" ");
+    this.firstName = firstName;
+    this.lastName = lastName;
+  })
+  .get(function () {
+    return `${this.firstName} ${this.lastName}`;
+  });
 userSchema.index(
   { firstName: 1, lastName: 1 },
   { unique: true, name: "fullName_index" },
