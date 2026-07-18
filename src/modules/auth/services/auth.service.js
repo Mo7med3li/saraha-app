@@ -1,6 +1,11 @@
 import { createOne, findOne } from "../../../db/db.service.js";
 import UserModel from "../../../db/models/user.model.js";
 import { asyncHandler, successResponse } from "../../../lib/utils/response.js";
+import bcrypt from "bcryptjs";
+import {
+  compareHashPassword,
+  hashPassword,
+} from "../../../lib/utils/security/hash.security.js";
 
 // Signup service
 export const signup = asyncHandler(async (req, res, next) => {
@@ -16,7 +21,7 @@ export const signup = asyncHandler(async (req, res, next) => {
   if (await findOne({ model: UserModel, filters: { email } })) {
     return next(new Error("email already exists", { cause: 409 }));
   }
-
+  const hashedPassword = await hashPassword({ password });
   //   Create user
   const [user] = await createOne({
     model: UserModel,
@@ -24,7 +29,7 @@ export const signup = asyncHandler(async (req, res, next) => {
       {
         userName,
         email,
-        password,
+        password: hashedPassword,
         gender,
         phoneNumber,
       },
@@ -44,11 +49,18 @@ export const login = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
   const user = await findOne({
     model: UserModel,
-    filters: { email, password },
-    select: "-password",
+    filters: { email },
   });
 
   if (!user) {
+    return next(new Error("invalid email or password", { cause: 404 }));
+  }
+
+  const matched = await compareHashPassword({
+    password,
+    hashedPassword: user?.password,
+  });
+  if (!matched) {
     return next(new Error("invalid email or password", { cause: 404 }));
   }
   return successResponse({
