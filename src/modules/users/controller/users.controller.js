@@ -1,9 +1,8 @@
 import { Router } from "express";
+import { getUserById } from "../services/users.service.js";
 
 const usersRouter = Router();
 
-usersRouter.get("/", (req, res) => {
-  res.send("Hello World");
-});
+usersRouter.get("/profile/:id", getUserById);
 
 export default usersRouter;

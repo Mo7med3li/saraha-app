@@ -1,11 +1,11 @@
 import { createOne, findOne } from "../../../db/db.service.js";
 import UserModel from "../../../db/models/user.model.js";
 import { asyncHandler, successResponse } from "../../../lib/utils/response.js";
-import bcrypt from "bcryptjs";
 import {
   compareHashPassword,
   hashPassword,
 } from "../../../lib/utils/security/hash.security.js";
+import { encryption } from "../../../lib/utils/security/encryption.security.js";
 
 // Signup service
 export const signup = asyncHandler(async (req, res, next) => {
@@ -22,6 +22,9 @@ export const signup = asyncHandler(async (req, res, next) => {
     return next(new Error("email already exists", { cause: 409 }));
   }
   const hashedPassword = await hashPassword({ password });
+  const encryptedPhoneNumber = encryption({
+    plainText: phoneNumber,
+  });
   //   Create user
   const [user] = await createOne({
     model: UserModel,
@@ -31,11 +34,11 @@ export const signup = asyncHandler(async (req, res, next) => {
         email,
         password: hashedPassword,
         gender,
-        phoneNumber,
+        phoneNumber: encryptedPhoneNumber,
       },
     ],
   });
-
+  user.password = undefined;
   return successResponse({
     res,
     statusCode: 201,
