@@ -7,6 +7,15 @@ export const findOne = async ({
   return await model.findOne(filters).select(select).populate(populate);
 };
 
+export const findById = async ({
+  model,
+  id,
+  select = "",
+  populate = [],
+} = {}) => {
+  return await model.findById(id).select(select).populate(populate);
+};
+
 export const findAll = async ({
   model,
   filters = {},
