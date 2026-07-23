@@ -12,7 +12,7 @@ export const asyncHandler = (func) => {
 export const globalErrorHandler = (err, req, res, next) => {
   return res.status(err.cause || 400).json({
     message: err.message,
-    stack: err.stack,
+    stack: process.env.MODE === "Dev" ? err.stack : undefined,
   });
 };
 

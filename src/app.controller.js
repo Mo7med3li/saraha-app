@@ -6,7 +6,7 @@ import messagesRouter from "./modules/messages/controller/messages.controller.js
 import { globalErrorHandler } from "./lib/utils/response.js";
 export const bootstrap = () => {
   const app = express();
-  const port = 3000;
+  const port = process.env.PORT || 5000;
   app.use(express.json());
 
   //   root route
