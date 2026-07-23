@@ -1,11 +1,12 @@
 import { createOne, findOne } from "../../../db/db.service.js";
 import UserModel from "../../../db/models/user.model.js";
 import { asyncHandler, successResponse } from "../../../lib/utils/response.js";
+import { encryption } from "../../../lib/utils/security/encryption.security.js";
 import {
   compareHashPassword,
   hashPassword,
 } from "../../../lib/utils/security/hash.security.js";
-import { encryption } from "../../../lib/utils/security/encryption.security.js";
+import { generateToken } from "../../../lib/utils/security/token.security.js";
 
 // Signup service
 export const signup = asyncHandler(async (req, res, next) => {
@@ -66,10 +67,26 @@ export const login = asyncHandler(async (req, res, next) => {
   if (!matched) {
     return next(new Error("invalid email or password", { cause: 404 }));
   }
+
+  const token = generateToken({
+    payload: { _id: user._id },
+
+    options: {
+      expiresIn: 60 * 30,
+    },
+  });
+
+  const refreshToken = generateToken({
+    payload: { _id: user._id },
+    signature: process.env.REFRESH_JWT_SECRET,
+    options: {
+      expiresIn: "1y",
+    },
+  });
   return successResponse({
     res,
     statusCode: 200,
     message: "Login successful",
-    data: { user },
+    data: { token, refreshToken },
   });
 });
