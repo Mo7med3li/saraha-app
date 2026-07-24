@@ -12,6 +12,7 @@ import {
 } from "../../../lib/utils/security/hash.security.js";
 import {
   generateToken,
+  generateTokens,
   getSignature,
   verifyToken,
 } from "../../../lib/utils/security/token.security.js";
@@ -76,33 +77,23 @@ export const login = asyncHandler(async (req, res, next) => {
     return next(new Error("invalid email or password", { cause: 404 }));
   }
 
-  const signatureLevel =
-    user.role === ROLES_ENUM.ADMIN
-      ? SIGNATURE_LEVEL_LABEL.SYSTEM
-      : SIGNATURE_LEVEL_LABEL.BEARER;
-  const { accessSignature, refreshSignature } = getSignature({
-    bearer: signatureLevel,
-  });
-
-  const token = generateToken({
-    payload: { _id: user._id },
-    signature: accessSignature,
-    options: {
-      expiresIn: 60 * 30,
-    },
-  });
-
-  const refreshToken = generateToken({
-    payload: { _id: user._id },
-    signature: refreshSignature,
-    options: {
-      expiresIn: "1y",
-    },
-  });
+  const { accessToken, refreshToken } = await generateTokens({ user });
   return successResponse({
     res,
     statusCode: 200,
     message: "Login successful",
-    data: { token, refreshToken },
+    data: { accessToken, refreshToken },
+  });
+});
+
+export const refreshToken = asyncHandler(async (req, res, next) => {
+  const { user } = req;
+
+  const { accessToken, refreshToken } = await generateTokens({ user });
+  return successResponse({
+    res,
+    statusCode: 200,
+    message: "Refresh token generated successfully",
+    data: { accessToken, refreshToken },
   });
 });
