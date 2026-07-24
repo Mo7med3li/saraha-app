@@ -12,3 +12,8 @@ export const SIGNATURE_LEVEL_LABEL = {
   SYSTEM: "System",
   BEARER: "Bearer",
 };
+
+export const TOKEN_TYPES_ENUM = {
+  ACCESS: "access",
+  REFRESH: "refresh",
+};
