@@ -1,12 +1,20 @@
 import { createOne, findOne } from "../../../db/db.service.js";
 import UserModel from "../../../db/models/user.model.js";
+import {
+  ROLES_ENUM,
+  SIGNATURE_LEVEL_LABEL,
+} from "../../../lib/constants/constants.js";
 import { asyncHandler, successResponse } from "../../../lib/utils/response.js";
 import { encryption } from "../../../lib/utils/security/encryption.security.js";
 import {
   compareHashPassword,
   hashPassword,
 } from "../../../lib/utils/security/hash.security.js";
-import { generateToken } from "../../../lib/utils/security/token.security.js";
+import {
+  generateToken,
+  getSignature,
+  verifyToken,
+} from "../../../lib/utils/security/token.security.js";
 
 // Signup service
 export const signup = asyncHandler(async (req, res, next) => {
@@ -68,9 +76,17 @@ export const login = asyncHandler(async (req, res, next) => {
     return next(new Error("invalid email or password", { cause: 404 }));
   }
 
+  const signatureLevel =
+    user.role === ROLES_ENUM.ADMIN
+      ? SIGNATURE_LEVEL_LABEL.SYSTEM
+      : SIGNATURE_LEVEL_LABEL.BEARER;
+  const { accessSignature, refreshSignature } = getSignature({
+    bearer: signatureLevel,
+  });
+
   const token = generateToken({
     payload: { _id: user._id },
-
+    signature: accessSignature,
     options: {
       expiresIn: 60 * 30,
     },
@@ -78,7 +94,7 @@ export const login = asyncHandler(async (req, res, next) => {
 
   const refreshToken = generateToken({
     payload: { _id: user._id },
-    signature: process.env.REFRESH_JWT_SECRET,
+    signature: refreshSignature,
     options: {
       expiresIn: "1y",
     },
