@@ -1,5 +1,5 @@
 import Mongoose from "mongoose";
-import { Gender_Enum } from "../../lib/constants/constants.js";
+import { Gender_Enum, ROLES_ENUM } from "../../lib/constants/constants.js";
 
 const userSchema = new Mongoose.Schema(
   {
@@ -39,7 +39,19 @@ const userSchema = new Mongoose.Schema(
       required: true,
       default: Gender_Enum.MALE,
     },
-    phoneNumber: String,
+    role: {
+      type: String,
+      enum: {
+        values: Object.values(ROLES_ENUM),
+        message: "role must be a valid role",
+      },
+      required: true,
+      default: ROLES_ENUM.USER,
+    },
+    phoneNumber: {
+      type: String,
+      required: true,
+    },
     confirmEmail: Date,
   },
 
