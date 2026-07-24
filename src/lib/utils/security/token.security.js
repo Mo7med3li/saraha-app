@@ -1,11 +1,11 @@
 import jwt from "jsonwebtoken";
+import { findById } from "../../../db/db.service.js";
+import UserModel from "../../../db/models/user.model.js";
 import {
   ROLES_ENUM,
   SIGNATURE_LEVEL_LABEL,
   TOKEN_TYPES_ENUM,
 } from "../../constants/constants.js";
-import { findById } from "../../../db/db.service.js";
-import UserModel from "../../../db/models/user.model.js";
 
 export const generateToken = ({
   payload = {},

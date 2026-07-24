@@ -1,12 +1,6 @@
-import { findById } from "../db/db.service.js";
-import UserModel from "../db/models/user.model.js";
-import { ROLES_ENUM, TOKEN_TYPES_ENUM } from "../lib/constants/constants.js";
+import { TOKEN_TYPES_ENUM } from "../lib/constants/constants.js";
 import { asyncHandler } from "../lib/utils/response.js";
-import {
-  decodeToken,
-  getSignature,
-  verifyToken,
-} from "../lib/utils/security/token.security.js";
+import { decodeToken } from "../lib/utils/security/token.security.js";
 
 export const authMiddleware = ({
   tokenType = TOKEN_TYPES_ENUM.ACCESS,
