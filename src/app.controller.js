@@ -4,10 +4,14 @@ import authRouter from "./modules/auth/controller/auth.controller.js";
 import connectionMongoDB from "./db/connection.db.js";
 import messagesRouter from "./modules/messages/controller/messages.controller.js";
 import { globalErrorHandler } from "./lib/utils/response.js";
+import cors from "cors";
 export const bootstrap = () => {
   const app = express();
   const port = process.env.PORT || 5000;
   app.use(express.json());
+
+  // CORS
+  app.use(cors());
 
   //   root route
   app.get("/", (req, res) => {
