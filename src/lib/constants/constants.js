@@ -17,3 +17,8 @@ export const TOKEN_TYPES_ENUM = {
   ACCESS: "access",
   REFRESH: "refresh",
 };
+
+export const PROVIDERS_ENUM = {
+  SYSTEM: "system",
+  GOOGLE: "google",
+};

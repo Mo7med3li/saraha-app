@@ -1,5 +1,9 @@
 import Mongoose from "mongoose";
-import { Gender_Enum, ROLES_ENUM } from "../../lib/constants/constants.js";
+import {
+  Gender_Enum,
+  PROVIDERS_ENUM,
+  ROLES_ENUM,
+} from "../../lib/constants/constants.js";
 
 const userSchema = new Mongoose.Schema(
   {
@@ -26,7 +30,9 @@ const userSchema = new Mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
+      required: function () {
+        return this.providers === PROVIDERS_ENUM.SYSTEM;
+      },
       minLength: [8, "Password must be at least 8 characters long"],
     },
 
@@ -50,9 +56,20 @@ const userSchema = new Mongoose.Schema(
     },
     phoneNumber: {
       type: String,
-      required: true,
+      required: function () {
+        return this.providers === PROVIDERS_ENUM.SYSTEM;
+      },
     },
     confirmEmail: Date,
+    picture: String,
+    providers: {
+      type: String,
+      enum: {
+        values: Object.values(PROVIDERS_ENUM),
+        message: "provider must be a valid provider",
+      },
+      default: PROVIDERS_ENUM.SYSTEM,
+    },
   },
 
   {
