@@ -1,11 +1,11 @@
-import express from "express";
-import userRouter from "./modules/users/controller/users.controller.js";
-import authRouter from "./modules/auth/controller/auth.controller.js";
-import connectionMongoDB from "./db/connection.db.js";
-import messagesRouter from "./modules/messages/controller/messages.controller.js";
-import { globalErrorHandler } from "./lib/utils/response.js";
 import cors from "cors";
-export const bootstrap = () => {
+import express from "express";
+import connectionMongoDB from "./db/connection.db.js";
+import { globalErrorHandler } from "./lib/utils/response.js";
+import authRouter from "./modules/auth/controller/auth.controller.js";
+import messagesRouter from "./modules/messages/controller/messages.controller.js";
+import userRouter from "./modules/users/controller/users.controller.js";
+export const bootstrap = async () => {
   const app = express();
   const port = process.env.PORT || 5000;
   app.use(express.json());
