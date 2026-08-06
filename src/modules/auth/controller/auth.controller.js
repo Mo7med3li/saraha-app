@@ -3,7 +3,7 @@ import { TOKEN_TYPES_ENUM } from "../../../lib/constants/constants.js";
 import { authMiddleware } from "../../../middleware/authentication.middleware.js";
 import {
   googleLogin,
-  googleSignup,
+  googleLoginOrSignup,
   login,
   refreshToken,
   signup,
@@ -12,7 +12,7 @@ import {
 const authRouter = Router();
 authRouter.post("/signup", signup);
 authRouter.post("/login", login);
-authRouter.post("/signup-google", googleSignup);
+authRouter.post("/signup-google", googleLoginOrSignup);
 authRouter.post("/login-google", googleLogin);
 
 authRouter.get(

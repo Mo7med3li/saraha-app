@@ -131,7 +131,7 @@ export const googleLogin = asyncHandler(async (req, res, next) => {
 });
 
 // google signup service
-export const googleSignup = asyncHandler(async (req, res, next) => {
+export const googleLoginOrSignup = asyncHandler(async (req, res, next) => {
   const { idToken } = req.body;
 
   const { email, name, picture, email_verified } = await verifyGoogleToken({
@@ -146,14 +146,20 @@ export const googleSignup = asyncHandler(async (req, res, next) => {
     filters: { email },
   });
   if (user) {
+    if (user.providers === PROVIDERS_ENUM.GOOGLE) {
+      // const { accessToken, refreshToken } = await generateTokens({ user });
+      // return successResponse({
+      //   res,
+      //   statusCode: 200,
+      //   message: "Login successful",
+      //   data: { accessToken, refreshToken },
+      // });
+
+      return await googleLogin(req, res, next);
+    }
     return next(new Error("email already exists", { cause: 409 }));
   }
-
-  const [firstName, lastName] = name.split(" ");
-  if (await findOne({ model: UserModel, filters: { firstName, lastName } })) {
-    return next(new Error("user name already exists", { cause: 409 }));
-  }
-  const newUser = await createOne({
+  const [newUser] = await createOne({
     model: UserModel,
     data: [
       {
@@ -165,10 +171,11 @@ export const googleSignup = asyncHandler(async (req, res, next) => {
       },
     ],
   });
+  const { accessToken, refreshToken } = await generateTokens({ user: newUser });
   return successResponse({
     res,
     statusCode: 201,
-    message: "User created successfully",
-    data: { userId: newUser[0].id },
+    message: "Signup successful",
+    data: { accessToken, refreshToken },
   });
 });
