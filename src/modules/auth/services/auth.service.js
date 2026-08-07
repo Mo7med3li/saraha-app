@@ -43,6 +43,7 @@ export const signup = asyncHandler(async (req, res, next) => {
         gender,
         phoneNumber: encryptedPhoneNumber,
         confirmEmailOtp,
+        confirmEmailOtpExpiresAt: new Date(Date.now() + 1000 * 2 * 60),
       },
     ],
   });
@@ -207,11 +208,13 @@ export const confirmEmail = asyncHandler(async (req, res, next) => {
       confirmEmailOtp: { $exists: true },
     },
   });
+
   if (!user) {
     return next(
       new Error("invalid email or email already confirmed", { cause: 404 }),
     );
   }
+
   const matched = await compareHash({
     plainText: otp,
     hash: user?.confirmEmailOtp,
@@ -219,12 +222,19 @@ export const confirmEmail = asyncHandler(async (req, res, next) => {
   if (!matched) {
     return next(new Error("invalid otp", { cause: 404 }));
   }
+  if (user.confirmEmailOtpExpiresAt < new Date(Date.now())) {
+    return next(
+      new Error("otp expired, please request a new otp", { cause: 400 }),
+    );
+  }
+
   const updatedUser = await updateOne({
     model: UserModel,
     filters: { email },
     data: {
       confirmEmail: new Date(),
       $unset: { confirmEmailOtp: 1 },
+      $unset: { confirmEmailOtpExpiresAt: 1 },
       $inc: { __v: 1 },
     },
   });

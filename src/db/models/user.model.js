@@ -62,6 +62,7 @@ const userSchema = new Mongoose.Schema(
     },
     confirmEmail: Date,
     confirmEmailOtp: String,
+    confirmEmailOtpExpiresAt: Date,
     picture: String,
     providers: {
       type: String,
