@@ -28,3 +28,12 @@ export const findAll = async ({
 export const createOne = async ({ model, data = [{}], options = {} }) => {
   return await model.create(data, options);
 };
+
+export const updateOne = async ({
+  model,
+  filters = {},
+  data = {},
+  options = { runValidators: true },
+}) => {
+  return await model.updateOne(filters, data, options);
+};
