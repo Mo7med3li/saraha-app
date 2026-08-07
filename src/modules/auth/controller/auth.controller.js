@@ -10,12 +10,14 @@ import {
   confirmEmail,
   resendConfirmEmail,
 } from "../services/auth.service.js";
+import { loginSchema, signupSchema } from "../schema/auth.schema.js";
+import { validationMiddleware } from "../../../middleware/validation.middleware.js";
 
 const authRouter = Router();
-authRouter.post("/signup", signup);
+authRouter.post("/signup", validationMiddleware(signupSchema), signup);
 authRouter.patch("/confirm-email", confirmEmail);
 authRouter.patch("/resend-confirm-email-otp", resendConfirmEmail);
-authRouter.post("/login", login);
+authRouter.post("/login", validationMiddleware(loginSchema), login);
 authRouter.post("/signup-google", googleLoginOrSignup);
 authRouter.post("/login-google", googleLogin);
 
