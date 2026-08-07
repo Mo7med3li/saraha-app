@@ -7,10 +7,12 @@ import {
   login,
   refreshToken,
   signup,
+  confirmEmail,
 } from "../services/auth.service.js";
 
 const authRouter = Router();
 authRouter.post("/signup", signup);
+authRouter.patch("/confirm-email", confirmEmail);
 authRouter.post("/login", login);
 authRouter.post("/signup-google", googleLoginOrSignup);
 authRouter.post("/login-google", googleLogin);
