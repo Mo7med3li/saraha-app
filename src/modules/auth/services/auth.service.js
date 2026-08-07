@@ -248,3 +248,57 @@ export const confirmEmail = asyncHandler(async (req, res, next) => {
     data: {},
   });
 });
+
+// resend confirm email service
+export const resendConfirmEmail = asyncHandler(async (req, res, next) => {
+  const { email } = req.body;
+  const user = await findOne({
+    model: UserModel,
+    filters: {
+      email,
+      confirmEmail: { $exists: false },
+      confirmEmailOtp: { $exists: true },
+    },
+  });
+  if (!user) {
+    return next(
+      new Error("invalid email or email already confirmed", { cause: 404 }),
+    );
+  }
+  if (
+    user.confirmEmailOtpExpiresAt &&
+    user.confirmEmailOtpExpiresAt > new Date(Date.now())
+  ) {
+    return next(
+      new Error(
+        `otp not expired, please wait for ${Math.ceil((user.confirmEmailOtpExpiresAt - new Date(Date.now())) / 1000)} seconds`,
+        { cause: 400 },
+      ),
+    );
+  }
+  const otp = customAlphabet("0123456789", 6)();
+  const confirmEmailOtp = await generateHash({ plainText: otp });
+  emailEvent.emit("send-email", {
+    to: email,
+    subject: "Confirmation Email",
+    otp,
+    userName: user.userName,
+  });
+  const updatedUser = await updateOne({
+    model: UserModel,
+    filters: { email },
+    data: {
+      confirmEmailOtp,
+      confirmEmailOtpExpiresAt: new Date(Date.now() + 1000 * 2 * 60),
+    },
+  });
+  if (!updatedUser.matchedCount) {
+    return next(new Error("failed to resend confirm email", { cause: 400 }));
+  }
+  return successResponse({
+    res,
+    statusCode: 200,
+    message: "Confirmation email sent successfully",
+    data: {},
+  });
+});

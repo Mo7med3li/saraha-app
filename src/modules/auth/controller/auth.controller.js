@@ -8,11 +8,13 @@ import {
   refreshToken,
   signup,
   confirmEmail,
+  resendConfirmEmail,
 } from "../services/auth.service.js";
 
 const authRouter = Router();
 authRouter.post("/signup", signup);
 authRouter.patch("/confirm-email", confirmEmail);
+authRouter.patch("/resend-confirm-email-otp", resendConfirmEmail);
 authRouter.post("/login", login);
 authRouter.post("/signup-google", googleLoginOrSignup);
 authRouter.post("/login-google", googleLogin);
