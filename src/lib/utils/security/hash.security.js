@@ -7,6 +7,6 @@ export const generateHash = ({
   return bcrypt.hashSync(plainText, parseInt(saltRounds));
 };
 
-export const compareHashPassword = ({ password, hashedPassword }) => {
-  return bcrypt.compareSync(password, hashedPassword);
+export const compareHash = ({ plainText, hash }) => {
+  return bcrypt.compareSync(plainText, hash);
 };
