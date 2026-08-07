@@ -1,10 +1,10 @@
 import { OAuth2Client } from "google-auth-library";
-import { createOne, findOne } from "../../../db/db.service.js";
+import { createOne, findOne, updateOne } from "../../../db/db.service.js";
 import UserModel from "../../../db/models/user.model.js";
 import { asyncHandler, successResponse } from "../../../lib/utils/response.js";
 import { encryption } from "../../../lib/utils/security/encryption.security.js";
 import {
-  compareHashPassword,
+  compareHash,
   generateHash,
 } from "../../../lib/utils/security/hash.security.js";
 import { generateTokens } from "../../../lib/utils/security/token.security.js";
@@ -78,9 +78,9 @@ export const login = asyncHandler(async (req, res, next) => {
     return next(new Error("please confirm your email", { cause: 400 }));
   }
 
-  const matched = await compareHashPassword({
-    password,
-    hashedPassword: user?.password,
+  const matched = await compareHash({
+    plainText: password,
+    hash: user?.password,
   });
   if (!matched) {
     return next(new Error("invalid email or password", { cause: 404 }));
@@ -193,5 +193,48 @@ export const googleLoginOrSignup = asyncHandler(async (req, res, next) => {
     statusCode: 201,
     message: "Signup successful",
     data: { accessToken, refreshToken },
+  });
+});
+
+// confirm email service
+export const confirmEmail = asyncHandler(async (req, res, next) => {
+  const { email, otp } = req.body;
+  const user = await findOne({
+    model: UserModel,
+    filters: {
+      email,
+      confirmEmail: { $exists: false },
+      confirmEmailOtp: { $exists: true },
+    },
+  });
+  if (!user) {
+    return next(
+      new Error("invalid email or email already confirmed", { cause: 404 }),
+    );
+  }
+  const matched = await compareHash({
+    plainText: otp,
+    hash: user?.confirmEmailOtp,
+  });
+  if (!matched) {
+    return next(new Error("invalid otp", { cause: 404 }));
+  }
+  const updatedUser = await updateOne({
+    model: UserModel,
+    filters: { email },
+    data: {
+      confirmEmail: new Date(),
+      $unset: { confirmEmailOtp: 1 },
+      $inc: { __v: 1 },
+    },
+  });
+  if (!updatedUser.matchedCount) {
+    return next(new Error("failed to confirm email", { cause: 400 }));
+  }
+  return successResponse({
+    res,
+    statusCode: 200,
+    message: "Email confirmed successfully",
+    data: {},
   });
 });
