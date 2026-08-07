@@ -5,10 +5,12 @@ import { asyncHandler, successResponse } from "../../../lib/utils/response.js";
 import { encryption } from "../../../lib/utils/security/encryption.security.js";
 import {
   compareHashPassword,
-  hashPassword,
+  generateHash,
 } from "../../../lib/utils/security/hash.security.js";
 import { generateTokens } from "../../../lib/utils/security/token.security.js";
 import { PROVIDERS_ENUM } from "../../../lib/constants/constants.js";
+import emailEvent from "../../../lib/utils/events/email.event.js";
+import { customAlphabet } from "nanoid";
 
 // Signup service
 export const signup = asyncHandler(async (req, res, next) => {
@@ -24,10 +26,12 @@ export const signup = asyncHandler(async (req, res, next) => {
   if (await findOne({ model: UserModel, filters: { email } })) {
     return next(new Error("email already exists", { cause: 409 }));
   }
-  const hashedPassword = await hashPassword({ password });
+  const hashedPassword = await generateHash({ plainText: password });
   const encryptedPhoneNumber = encryption({
     plainText: phoneNumber,
   });
+  const otp = customAlphabet("0123456789", 6)();
+  const confirmEmailOtp = await generateHash({ plainText: otp });
   //   Create user
   const [user] = await createOne({
     model: UserModel,
@@ -38,10 +42,18 @@ export const signup = asyncHandler(async (req, res, next) => {
         password: hashedPassword,
         gender,
         phoneNumber: encryptedPhoneNumber,
+        confirmEmailOtp,
       },
     ],
   });
   user.password = undefined;
+  user.phoneNumber = undefined;
+  emailEvent.emit("send-email", {
+    to: email,
+    subject: "Confirmation Email",
+    otp,
+    userName: firstName,
+  });
   return successResponse({
     res,
     statusCode: 201,
@@ -60,6 +72,10 @@ export const login = asyncHandler(async (req, res, next) => {
 
   if (!user) {
     return next(new Error("invalid email or password", { cause: 404 }));
+  }
+
+  if (!user.confirmEmail) {
+    return next(new Error("please confirm your email", { cause: 400 }));
   }
 
   const matched = await compareHashPassword({
