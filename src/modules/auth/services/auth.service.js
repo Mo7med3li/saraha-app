@@ -12,6 +12,10 @@ import { PROVIDERS_ENUM } from "../../../lib/constants/constants.js";
 import emailEvent from "../../../lib/utils/events/email.event.js";
 import { customAlphabet } from "nanoid";
 
+const OTP_MAX_ATTEMPTS = 5;
+const OTP_BLOCK_MS = 1000 * 60 * 5;
+const OTP_TTL_MS = 1000 * 60 * 2;
+
 // Signup service
 export const signup = asyncHandler(async (req, res, next) => {
   const { userName, email, password, gender, phoneNumber } = req.body;
@@ -43,7 +47,8 @@ export const signup = asyncHandler(async (req, res, next) => {
         gender,
         phoneNumber: encryptedPhoneNumber,
         confirmEmailOtp,
-        confirmEmailOtpExpiresAt: new Date(Date.now() + 1000 * 2 * 60),
+        confirmEmailOtpExpiresAt: new Date(Date.now() + OTP_TTL_MS),
+        confirmEmailOtpAttempts: 1,
       },
     ],
   });
@@ -233,8 +238,12 @@ export const confirmEmail = asyncHandler(async (req, res, next) => {
     filters: { email },
     data: {
       confirmEmail: new Date(),
-      $unset: { confirmEmailOtp: 1 },
-      $unset: { confirmEmailOtpExpiresAt: 1 },
+      $unset: {
+        confirmEmailOtp: 1,
+        confirmEmailOtpExpiresAt: 1,
+        confirmEmailOtpAttempts: 1,
+        confirmEmailOtpBlockedUntil: 1,
+      },
       $inc: { __v: 1 },
     },
   });
@@ -252,6 +261,8 @@ export const confirmEmail = asyncHandler(async (req, res, next) => {
 // resend confirm email service
 export const resendConfirmEmail = asyncHandler(async (req, res, next) => {
   const { email } = req.body;
+  const now = new Date();
+
   const user = await findOne({
     model: UserModel,
     filters: {
@@ -265,36 +276,69 @@ export const resendConfirmEmail = asyncHandler(async (req, res, next) => {
       new Error("invalid email or email already confirmed", { cause: 404 }),
     );
   }
+
   if (
-    user.confirmEmailOtpExpiresAt &&
-    user.confirmEmailOtpExpiresAt > new Date(Date.now())
+    user.confirmEmailOtpBlockedUntil &&
+    user.confirmEmailOtpBlockedUntil > now
   ) {
+    const retryAfterSeconds = Math.ceil(
+      (user.confirmEmailOtpBlockedUntil - now) / 1000,
+    );
     return next(
       new Error(
-        `otp not expired, please wait for ${Math.ceil((user.confirmEmailOtpExpiresAt - new Date(Date.now())) / 1000)} seconds`,
+        `too many otp requests, please try again in ${retryAfterSeconds} seconds`,
+        { cause: 429 },
+      ),
+    );
+  }
+
+  if (user.confirmEmailOtpExpiresAt && user.confirmEmailOtpExpiresAt > now) {
+    return next(
+      new Error(
+        `otp not expired, please wait for ${Math.ceil((user.confirmEmailOtpExpiresAt - now) / 1000)} seconds`,
         { cause: 400 },
       ),
     );
   }
+
+  // Block window ended → start a fresh attempt window
+  const previousAttempts =
+    user.confirmEmailOtpBlockedUntil && user.confirmEmailOtpBlockedUntil <= now
+      ? 0
+      : user.confirmEmailOtpAttempts || 0;
+  const nextAttempts = previousAttempts + 1;
+
   const otp = customAlphabet("0123456789", 6)();
   const confirmEmailOtp = await generateHash({ plainText: otp });
+
+  const data = {
+    confirmEmailOtp,
+    confirmEmailOtpExpiresAt: new Date(now.getTime() + OTP_TTL_MS),
+    confirmEmailOtpAttempts: nextAttempts,
+  };
+
+  if (nextAttempts >= OTP_MAX_ATTEMPTS) {
+    data.confirmEmailOtpBlockedUntil = new Date(now.getTime() + OTP_BLOCK_MS);
+  } else if (user.confirmEmailOtpBlockedUntil) {
+    data.$unset = { confirmEmailOtpBlockedUntil: 1 };
+  }
+
+  const updatedUser = await updateOne({
+    model: UserModel,
+    filters: { email },
+    data,
+  });
+  if (!updatedUser.matchedCount) {
+    return next(new Error("failed to resend confirm email", { cause: 400 }));
+  }
+
   emailEvent.emit("send-email", {
     to: email,
     subject: "Confirmation Email",
     otp,
     userName: user.userName,
   });
-  const updatedUser = await updateOne({
-    model: UserModel,
-    filters: { email },
-    data: {
-      confirmEmailOtp,
-      confirmEmailOtpExpiresAt: new Date(Date.now() + 1000 * 2 * 60),
-    },
-  });
-  if (!updatedUser.matchedCount) {
-    return next(new Error("failed to resend confirm email", { cause: 400 }));
-  }
+
   return successResponse({
     res,
     statusCode: 200,
