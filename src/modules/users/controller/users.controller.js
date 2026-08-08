@@ -8,10 +8,12 @@ import {
   getUserSharedData,
   freezeAccount,
   updateUserInfo,
+  restoreAccount,
 } from "../services/users.service.js";
 import { authorize } from "../../../authorize/authorize.js";
 import {
   freezeAccountSchema,
+  restoreAccountSchema,
   userSharedDataSchema,
   userUpdateInfoSchema,
 } from "../schema/user.schema.js";
@@ -44,5 +46,11 @@ usersRouter.delete(
   validationMiddleware(freezeAccountSchema),
   freezeAccount,
 );
-
+usersRouter.patch(
+  "/:id/restore-account",
+  authMiddleware(),
+  authorizeMiddleware({ roles: authorize.restoreAccount }),
+  validationMiddleware(restoreAccountSchema),
+  restoreAccount,
+);
 export default usersRouter;
