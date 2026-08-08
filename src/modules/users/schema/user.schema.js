@@ -28,3 +28,9 @@ export const restoreAccountSchema = {
     id: generalFieldsSchema.id.required(),
   }),
 };
+
+export const deleteAccountSchema = {
+  params: Joi.object().keys({
+    id: generalFieldsSchema.id.required(),
+  }),
+};
