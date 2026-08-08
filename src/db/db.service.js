@@ -57,3 +57,7 @@ export const findAndUpdate = async ({
     .select(select)
     .populate(populate);
 };
+
+export const deleteOne = async ({ model, filters = {} }) => {
+  return await model.deleteOne(filters);
+};

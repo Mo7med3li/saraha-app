@@ -19,6 +19,6 @@ export const globalErrorHandler = (err, req, res, next) => {
 export const successResponse = ({ res, statusCode, message, data }) => {
   return res.status(statusCode || 200).json({
     message: message || "Success",
-    data: data || null,
+    data: data || undefined,
   });
 };
