@@ -1,5 +1,6 @@
 import { findAndUpdate, findOne, updateOne } from "../../../db/db.service.js";
 import UserModel from "../../../db/models/user.model.js";
+import { ROLES_ENUM } from "../../../lib/constants/constants.js";
 import { asyncHandler, successResponse } from "../../../lib/utils/response.js";
 import {
   decryption,
@@ -84,6 +85,40 @@ export const updateUserInfo = asyncHandler(async (req, res, next) => {
     res,
     statusCode: 200,
     message: "User info updated successfully",
+    data: { user: updatedUser },
+  });
+});
+
+export const freezeAccount = asyncHandler(async (req, res, next) => {
+  const { user } = req;
+  const { id } = req.params;
+
+  if (id && user.role !== ROLES_ENUM.ADMIN) {
+    return next(
+      new Error("You are not authorized to freeze this account", {
+        cause: 403,
+      }),
+    );
+  }
+
+  const updatedUser = await findAndUpdate({
+    model: UserModel,
+    filters: { _id: id || user._id, deletedAt: { $exists: false } },
+    data: { deletedAt: new Date(), deletedBy: user._id },
+    select: "-password -confirmEmailOtpAttempts",
+  });
+  if (!updatedUser) {
+    return next(
+      new Error("Failed to freeze account or account already frozen", {
+        cause: 400,
+      }),
+    );
+  }
+
+  return successResponse({
+    res,
+    statusCode: 200,
+    message: "Account frozen successfully",
     data: { user: updatedUser },
   });
 });

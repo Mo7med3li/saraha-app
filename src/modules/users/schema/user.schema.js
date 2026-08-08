@@ -16,3 +16,9 @@ export const userUpdateInfoSchema = {
     })
     .required(),
 };
+
+export const freezeAccountSchema = {
+  params: Joi.object().keys({
+    id: generalFieldsSchema.id,
+  }),
+};

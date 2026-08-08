@@ -6,10 +6,12 @@ import {
 import {
   getUserById,
   getUserSharedData,
+  freezeAccount,
   updateUserInfo,
 } from "../services/users.service.js";
 import { authorize } from "../../../authorize/authorize.js";
 import {
+  freezeAccountSchema,
   userSharedDataSchema,
   userUpdateInfoSchema,
 } from "../schema/user.schema.js";
@@ -34,6 +36,13 @@ usersRouter.patch(
   authMiddleware(),
   validationMiddleware(userUpdateInfoSchema),
   updateUserInfo,
+);
+
+usersRouter.delete(
+  "{/:id}/freeze-account",
+  authMiddleware(),
+  validationMiddleware(freezeAccountSchema),
+  freezeAccount,
 );
 
 export default usersRouter;
