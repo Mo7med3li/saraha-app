@@ -6,3 +6,13 @@ export const userSharedDataSchema = {
     id: generalFieldsSchema.id.required(),
   }),
 };
+
+export const userUpdateInfoSchema = {
+  body: Joi.object()
+    .keys({
+      userName: generalFieldsSchema.userName,
+      gender: generalFieldsSchema.gender,
+      phoneNumber: generalFieldsSchema.phoneNumber,
+    })
+    .required(),
+};
