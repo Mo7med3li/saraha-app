@@ -74,6 +74,17 @@ const userSchema = new Mongoose.Schema(
       },
       default: PROVIDERS_ENUM.SYSTEM,
     },
+    deletedAt: Date,
+    deletedBy: {
+      type: Mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+
+    restoredAt: Date,
+    restoredBy: {
+      type: Mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
 
   {
