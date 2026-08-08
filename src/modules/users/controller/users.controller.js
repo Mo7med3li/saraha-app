@@ -3,9 +3,16 @@ import {
   authMiddleware,
   authorizeMiddleware,
 } from "../../../middleware/authentication.middleware.js";
-import { getUserById, getUserSharedData } from "../services/users.service.js";
+import {
+  getUserById,
+  getUserSharedData,
+  updateUserInfo,
+} from "../services/users.service.js";
 import { authorize } from "../../../authorize/authorize.js";
-import { userSharedDataSchema } from "../schema/user.schema.js";
+import {
+  userSharedDataSchema,
+  userUpdateInfoSchema,
+} from "../schema/user.schema.js";
 import { validationMiddleware } from "../../../middleware/validation.middleware.js";
 
 const usersRouter = Router();
@@ -20,6 +27,13 @@ usersRouter.get(
   "/:id",
   validationMiddleware(userSharedDataSchema),
   getUserSharedData,
+);
+
+usersRouter.patch(
+  "/",
+  authMiddleware(),
+  validationMiddleware(userUpdateInfoSchema),
+  updateUserInfo,
 );
 
 export default usersRouter;
