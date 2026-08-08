@@ -10,19 +10,43 @@ import {
   confirmEmail,
   resendConfirmEmail,
 } from "../services/auth.service.js";
-import { loginSchema, signupSchema } from "../schema/auth.schema.js";
+import {
+  confirmEmailSchema,
+  googleAuthSchema,
+  loginSchema,
+  refreshTokenSchema,
+  resendConfirmEmailSchema,
+  signupSchema,
+} from "../schema/auth.schema.js";
 import { validationMiddleware } from "../../../middleware/validation.middleware.js";
 
 const authRouter = Router();
 authRouter.post("/signup", validationMiddleware(signupSchema), signup);
-authRouter.patch("/confirm-email", confirmEmail);
-authRouter.patch("/resend-confirm-email-otp", resendConfirmEmail);
+authRouter.patch(
+  "/confirm-email",
+  validationMiddleware(confirmEmailSchema),
+  confirmEmail,
+);
+authRouter.patch(
+  "/resend-confirm-email-otp",
+  validationMiddleware(resendConfirmEmailSchema),
+  resendConfirmEmail,
+);
 authRouter.post("/login", validationMiddleware(loginSchema), login);
-authRouter.post("/signup-google", googleLoginOrSignup);
-authRouter.post("/login-google", googleLogin);
+authRouter.post(
+  "/signup-google",
+  validationMiddleware(googleAuthSchema),
+  googleLoginOrSignup,
+);
+authRouter.post(
+  "/login-google",
+  validationMiddleware(googleAuthSchema),
+  googleLogin,
+);
 
 authRouter.get(
   "/refresh-token",
+  validationMiddleware(refreshTokenSchema),
   authMiddleware({ tokenType: TOKEN_TYPES_ENUM.REFRESH }),
   refreshToken,
 );
