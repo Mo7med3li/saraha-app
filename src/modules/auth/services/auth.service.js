@@ -73,7 +73,11 @@ export const login = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
   const user = await findOne({
     model: UserModel,
-    filters: { email, providers: PROVIDERS_ENUM.SYSTEM },
+    filters: {
+      email,
+      providers: PROVIDERS_ENUM.SYSTEM,
+      deletedAt: { $exists: false },
+    },
   });
 
   if (!user) {
