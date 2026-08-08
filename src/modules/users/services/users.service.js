@@ -104,7 +104,14 @@ export const freezeAccount = asyncHandler(async (req, res, next) => {
   const updatedUser = await findAndUpdate({
     model: UserModel,
     filters: { _id: id || user._id, deletedAt: { $exists: false } },
-    data: { deletedAt: new Date(), deletedBy: user._id },
+    data: {
+      deletedAt: new Date(),
+      deletedBy: user._id,
+      $unset: {
+        restoredAt: 1,
+        restoredBy: 1,
+      },
+    },
     select: "-password -confirmEmailOtpAttempts",
   });
   if (!updatedUser) {
@@ -119,6 +126,48 @@ export const freezeAccount = asyncHandler(async (req, res, next) => {
     res,
     statusCode: 200,
     message: "Account frozen successfully",
+    data: { user: updatedUser },
+  });
+});
+
+export const restoreAccount = asyncHandler(async (req, res, next) => {
+  const { user } = req;
+  const { id } = req.params;
+
+  const updatedUser = await findAndUpdate({
+    model: UserModel,
+    filters: {
+      _id: id,
+      deletedAt: { $exists: true },
+      // to prevent the admin to restore user account the freezed from the user himself
+      deletedBy: { $ne: id },
+    },
+    data: {
+      $unset: {
+        deletedAt: 1,
+        deletedBy: 1,
+      },
+      $set: {
+        restoredAt: new Date(),
+        restoredBy: user._id,
+      },
+    },
+    select: "-password -confirmEmailOtpAttempts",
+  });
+
+  console.log(updatedUser);
+  if (!updatedUser) {
+    return next(
+      new Error("Failed to restore account or account not freezed", {
+        cause: 400,
+      }),
+    );
+  }
+
+  return successResponse({
+    res,
+    statusCode: 200,
+    message: "Account restored successfully",
     data: { user: updatedUser },
   });
 });
