@@ -1,5 +1,6 @@
 import Joi from "joi";
 import { Gender_Enum } from "./constants.js";
+import { Types } from "mongoose";
 
 export const generalFieldsSchema = {
   userName: Joi.string()
@@ -59,5 +60,10 @@ export const generalFieldsSchema = {
   otp: Joi.string().min(6).max(6).messages({
     "string.min": "OTP must be 6 digits",
     "string.max": "OTP must be 6 digits",
+  }),
+  id: Joi.string().custom((value, helpers) => {
+    return (
+      Types.ObjectId.isValid(value) || helpers.message("invalid id format")
+    );
   }),
 };
