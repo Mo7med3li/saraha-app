@@ -1,45 +1,47 @@
 import Joi from "joi";
-import { Gender_Enum } from "../../../lib/constants/constants.js";
+import { generalFieldsSchema } from "../../../lib/constants/schema.constant.js";
 
 // Login schema
-export const loginSchema = Joi.object().keys({
-  email: Joi.string()
-    .email({
-      tlds: { allow: ["com", "net", "org", "in"] },
-      minDomainSegments: 2,
-      maxDomainSegments: 3,
-    })
-    .required(),
-  password: Joi.string()
-    .trim()
-    .min(8)
-    .regex(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/)
-    .required()
-    .messages({
-      "string.pattern.base":
-        "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
-    }),
-});
+export const loginSchema = {
+  body: Joi.object().keys({
+    email: generalFieldsSchema.email.required(),
+    password: generalFieldsSchema.password.required(),
+  }),
+};
 
 // Signup schema
-export const signupSchema = loginSchema.append({
-  userName: Joi.string()
-    .trim()
-    .min(2)
-    .max(30)
-    .regex(/^[a-zA-Z\u0621-\u064Aء-ئ][^#&<>\"~;$^%{}?]{1,20}$/)
-    .required()
-    .messages({
-      "string.pattern.base": "Invalid user name format",
-    }),
-  confirmPassword: Joi.string().required().valid(Joi.ref("password")).messages({
-    "any.only": "Password and confirm password do not match",
+export const signupSchema = {
+  body: loginSchema.body.append({
+    userName: generalFieldsSchema.userName.required(),
+    confirmPassword: generalFieldsSchema.confirmPassword.required(),
+    phoneNumber: generalFieldsSchema.phoneNumber.required(),
+    gender: generalFieldsSchema.gender.required(),
   }),
-  phoneNumber: Joi.string()
-    .regex(/^(002|\+2)?01[0125][0-9]{8}$/)
-    .required()
-    .messages({
-      "string.pattern.base": "Invalid phone number format",
-    }),
-  gender: Joi.string().valid(Gender_Enum.MALE, Gender_Enum.FEMALE).required(),
-});
+};
+
+export const confirmEmailSchema = {
+  body: Joi.object().keys({
+    email: generalFieldsSchema.email.required(),
+    otp: generalFieldsSchema.otp.required(),
+  }),
+};
+
+export const resendConfirmEmailSchema = {
+  body: Joi.object().keys({
+    email: generalFieldsSchema.email.required(),
+  }),
+};
+
+export const googleAuthSchema = {
+  body: Joi.object().keys({
+    idToken: Joi.string().required(),
+  }),
+};
+
+export const refreshTokenSchema = {
+  headers: Joi.object()
+    .keys({
+      authorization: Joi.string().required(),
+    })
+    .unknown(true),
+};
