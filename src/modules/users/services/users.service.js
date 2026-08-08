@@ -1,4 +1,9 @@
-import { findAndUpdate, findOne, updateOne } from "../../../db/db.service.js";
+import {
+  deleteOne,
+  findAndUpdate,
+  findOne,
+  updateOne,
+} from "../../../db/db.service.js";
 import UserModel from "../../../db/models/user.model.js";
 import { ROLES_ENUM } from "../../../lib/constants/constants.js";
 import { asyncHandler, successResponse } from "../../../lib/utils/response.js";
@@ -169,5 +174,28 @@ export const restoreAccount = asyncHandler(async (req, res, next) => {
     statusCode: 200,
     message: "Account restored successfully",
     data: { user: updatedUser },
+  });
+});
+
+export const deleteAccount = asyncHandler(async (req, res, next) => {
+  const { user } = req;
+  const { id } = req.params;
+
+  const deletedUser = await deleteOne({
+    model: UserModel,
+    filters: { _id: id, deletedAt: { $exists: true } },
+  });
+  if (!deletedUser.deletedCount) {
+    return next(
+      new Error("Failed to delete account or account not freezed", {
+        cause: 400,
+      }),
+    );
+  }
+
+  return successResponse({
+    res,
+    statusCode: 200,
+    message: "Account deleted successfully",
   });
 });

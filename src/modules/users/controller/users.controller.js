@@ -9,9 +9,11 @@ import {
   freezeAccount,
   updateUserInfo,
   restoreAccount,
+  deleteAccount,
 } from "../services/users.service.js";
 import { authorize } from "../../../authorize/authorize.js";
 import {
+  deleteAccountSchema,
   freezeAccountSchema,
   restoreAccountSchema,
   userSharedDataSchema,
@@ -52,5 +54,12 @@ usersRouter.patch(
   authorizeMiddleware({ roles: authorize.restoreAccount }),
   validationMiddleware(restoreAccountSchema),
   restoreAccount,
+);
+usersRouter.delete(
+  "/:id",
+  authMiddleware(),
+  authorizeMiddleware({ roles: authorize.deleteAccount }),
+  validationMiddleware(deleteAccountSchema),
+  deleteAccount,
 );
 export default usersRouter;
