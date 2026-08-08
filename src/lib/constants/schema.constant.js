@@ -4,26 +4,47 @@ import { Gender_Enum } from "./constants.js";
 export const generalFieldsSchema = {
   userName: Joi.string()
     .trim()
-    .min(2)
-    .max(30)
-    .regex(/^[a-zA-Z\u0621-\u064Aء-ئ][^#&<>\"~;$^%{}?]{1,20}$/)
-
+    .regex(/^[A-Za-z\u0621-\u064A]{3,20} [A-Za-z\u0621-\u064A]{3,20}$/)
     .messages({
-      "string.pattern.base": "Invalid user name format",
+      "string.pattern.base":
+        "User name must be first and last name separated by one space (3-20 letters each)",
     }),
-  email: Joi.string().email({
-    tlds: { allow: ["com", "net", "org", "in"] },
-    minDomainSegments: 2,
-    maxDomainSegments: 3,
-  }),
+  email: Joi.string()
+    .trim()
+    .lowercase()
+    .email({
+      tlds: {
+        allow: [
+          "com",
+          "net",
+          "org",
+          "edu",
+          "gov",
+          "io",
+          "co",
+          "eg",
+          "info",
+          "me",
+          "dev",
+        ],
+      },
+      minDomainSegments: 2,
+      maxDomainSegments: 3,
+    })
+    .messages({
+      "string.email": "Please enter a valid email address",
+      "string.empty": "Email is required",
+    }),
   password: Joi.string()
     .trim()
     .min(8)
-    .regex(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/)
-
+    .max(64)
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,64}$/)
     .messages({
+      "string.min": "Password must be at least 8 characters",
+      "string.max": "Password must be at most 64 characters",
       "string.pattern.base":
-        "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+        "Password must include uppercase, lowercase, number, and special character",
     }),
   confirmPassword: Joi.string().valid(Joi.ref("password")).messages({
     "any.only": "Password and confirm password do not match",
