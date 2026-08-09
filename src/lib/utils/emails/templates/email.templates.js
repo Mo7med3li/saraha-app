@@ -1,7 +1,12 @@
 /**
  * @param {{ otp: string|number, userName?: string }} params
  */
-export const confirmEmailTemplate = ({ otp, userName, title } = {}) => {
+export const confirmEmailTemplate = ({
+  otp,
+  userName,
+  title,
+  purpose,
+} = {}) => {
   const greeting = userName ? `Hi ${userName},` : "Hi there,";
   const year = new Date().getFullYear();
 
@@ -42,7 +47,7 @@ export const confirmEmailTemplate = ({ otp, userName, title } = {}) => {
                 ${greeting}
               </p>
               <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#475569;text-align:center;">
-                Use the code below to verify your account. It expires soon — enter it only on Saraha.
+                Use the code below to ${purpose}. It expires soon — enter it only on Saraha.
               </p>
             </td>
           </tr>
