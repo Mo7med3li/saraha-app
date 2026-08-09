@@ -33,7 +33,7 @@ export const updateOne = async ({
   model,
   filters = {},
   data = {},
-  options = { runValidators: true, new: true },
+  options = { runValidators: true },
 }) => {
   return await model.updateOne(filters, data, options);
 };
@@ -43,7 +43,7 @@ export const findAndUpdate = async ({
   data = {},
   select = "",
   populate = [],
-  options = { runValidators: true, new: true },
+  options = { runValidators: true, returnDocument: "after" },
 }) => {
   return await model
     .findOneAndUpdate(

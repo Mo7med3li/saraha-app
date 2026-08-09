@@ -258,7 +258,6 @@ export const confirmEmail = asyncHandler(async (req, res, next) => {
     res,
     statusCode: 200,
     message: "Email confirmed successfully",
-    data: {},
   });
 });
 
@@ -347,6 +346,5 @@ export const resendConfirmEmail = asyncHandler(async (req, res, next) => {
     res,
     statusCode: 200,
     message: "Confirmation email sent successfully",
-    data: {},
   });
 });
