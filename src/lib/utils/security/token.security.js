@@ -59,7 +59,6 @@ export const decodeToken = async ({
   const user = await findById({
     model: UserModel,
     id: _id,
-    select: "-password",
   });
   if (!user) {
     return next(new Error("user not found", { cause: 404 }));
