@@ -45,12 +45,13 @@ export const findAndUpdate = async ({
   populate = [],
   options = { runValidators: true, returnDocument: "after" },
 }) => {
+  const { $inc: dataInc, ...rest } = data;
   return await model
     .findOneAndUpdate(
       filters,
       {
-        ...data,
-        $inc: { __v: 1 },
+        ...rest,
+        $inc: { __v: 1, ...dataInc },
       },
       options,
     )
