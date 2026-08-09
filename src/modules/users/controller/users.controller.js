@@ -10,12 +10,14 @@ import {
   updateUserInfo,
   restoreAccount,
   deleteAccount,
+  updatePassword,
 } from "../services/users.service.js";
 import { authorize } from "../../../authorize/authorize.js";
 import {
   deleteAccountSchema,
   freezeAccountSchema,
   restoreAccountSchema,
+  updatePasswordSchema,
   userSharedDataSchema,
   userUpdateInfoSchema,
 } from "../schema/user.schema.js";
@@ -42,6 +44,13 @@ usersRouter.patch(
   updateUserInfo,
 );
 
+usersRouter.patch(
+  "/update-password",
+  authMiddleware(),
+  validationMiddleware(updatePasswordSchema),
+  updatePassword,
+);
+
 usersRouter.delete(
   "{/:id}/freeze-account",
   authMiddleware(),
@@ -62,4 +71,5 @@ usersRouter.delete(
   validationMiddleware(deleteAccountSchema),
   deleteAccount,
 );
+
 export default usersRouter;

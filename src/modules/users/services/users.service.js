@@ -11,6 +11,10 @@ import {
   decryption,
   encryption,
 } from "../../../lib/utils/security/encryption.security.js";
+import {
+  compareHash,
+  generateHash,
+} from "../../../lib/utils/security/hash.security.js";
 
 // Get user by ID service
 export const getUserById = asyncHandler(async (req, res, next) => {
@@ -197,5 +201,42 @@ export const deleteAccount = asyncHandler(async (req, res, next) => {
     res,
     statusCode: 200,
     message: "Account deleted successfully",
+  });
+});
+
+export const updatePassword = asyncHandler(async (req, res, next) => {
+  const { user } = req;
+  const { oldPassword, password } = req.body;
+  if (!compareHash({ plainText: oldPassword, hash: user.password })) {
+    return next(new Error("Old password is incorrect", { cause: 400 }));
+  }
+
+  if (user?.oldPasswords?.length) {
+    for (const oldPassword of user.oldPasswords) {
+      if (await compareHash({ plainText: password, hash: oldPassword })) {
+        return next(
+          new Error("Password cannot be the same as the previous passwords", {
+            cause: 409,
+          }),
+        );
+      }
+    }
+  }
+  const updatedUser = await findAndUpdate({
+    model: UserModel,
+    filters: { _id: user._id },
+    data: {
+      password: await generateHash({ plainText: password }),
+      $push: { oldPasswords: { $each: [user.password], $slice: -3 } },
+    },
+    select: "-password -confirmEmailOtpAttempts",
+  });
+  if (!updatedUser) {
+    return next(new Error("Failed to update password", { cause: 400 }));
+  }
+  return successResponse({
+    res,
+    statusCode: 200,
+    message: "Password updated successfully",
   });
 });

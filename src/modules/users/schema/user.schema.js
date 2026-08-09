@@ -34,3 +34,18 @@ export const deleteAccountSchema = {
     id: generalFieldsSchema.id.required(),
   }),
 };
+
+export const updatePasswordSchema = {
+  body: Joi.object()
+    .keys({
+      oldPassword: generalFieldsSchema.password.required(),
+      password: generalFieldsSchema.password
+        .required()
+        .not(Joi.ref("oldPassword"))
+        .messages({
+          "any.invalid": "New password must be different from old password",
+        }),
+      confirmPassword: generalFieldsSchema.confirmPassword.required(),
+    })
+    .required(),
+};
