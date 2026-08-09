@@ -11,6 +11,7 @@ export const asyncHandler = (func) => {
 
 export const globalErrorHandler = (err, req, res, next) => {
   return res.status(err.cause || 400).json({
+    success: false,
     message: err.message,
     stack: process.env.MODE === "Dev" ? err.stack : undefined,
   });
@@ -18,6 +19,7 @@ export const globalErrorHandler = (err, req, res, next) => {
 
 export const successResponse = ({ res, statusCode, message, data }) => {
   return res.status(statusCode || 200).json({
+    success: true,
     message: message || "Success",
     data: data || undefined,
   });
