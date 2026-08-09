@@ -348,3 +348,218 @@ export const resendConfirmEmail = asyncHandler(async (req, res, next) => {
     message: "Confirmation email sent successfully",
   });
 });
+
+export const sendForgotPasswordOtp = asyncHandler(async (req, res, next) => {
+  const { email } = req.body;
+  const now = new Date();
+
+  const user = await findOne({
+    model: UserModel,
+    filters: {
+      email,
+      deletedAt: { $exists: false },
+      confirmEmail: { $exists: true },
+    },
+  });
+  if (!user) {
+    return next(new Error("invalid email or email not found", { cause: 404 }));
+  }
+
+  if (
+    user.forgotPasswordOtpBlockedUntil &&
+    user.forgotPasswordOtpBlockedUntil > now
+  ) {
+    const retryAfterSeconds = Math.ceil(
+      (user.forgotPasswordOtpBlockedUntil - now) / 1000,
+    );
+    return next(
+      new Error(
+        `too many otp requests, please try again in ${retryAfterSeconds} seconds`,
+        { cause: 429 },
+      ),
+    );
+  }
+
+  if (
+    user.forgotPasswordOtpExpiresAt &&
+    user.forgotPasswordOtpExpiresAt > now
+  ) {
+    return next(
+      new Error(
+        `otp not expired, please wait for ${Math.ceil((user.forgotPasswordOtpExpiresAt - now) / 1000)} seconds`,
+        { cause: 400 },
+      ),
+    );
+  }
+
+  // Block window ended → start a fresh attempt window
+  const previousAttempts =
+    user.forgotPasswordOtpBlockedUntil &&
+    user.forgotPasswordOtpBlockedUntil <= now
+      ? 0
+      : user.forgotPasswordOtpAttempts || 0;
+  const nextAttempts = previousAttempts + 1;
+
+  const otp = customAlphabet("0123456789", 6)();
+  const forgotPasswordOtp = generateHash({ plainText: otp });
+
+  const data = {
+    forgotPasswordOtp,
+    forgotPasswordOtpExpiresAt: new Date(now.getTime() + OTP_TTL_MS),
+    forgotPasswordOtpAttempts: nextAttempts,
+  };
+
+  if (nextAttempts >= OTP_MAX_ATTEMPTS) {
+    data.forgotPasswordOtpBlockedUntil = new Date(now.getTime() + OTP_BLOCK_MS);
+  } else if (user.forgotPasswordOtpBlockedUntil) {
+    data.$unset = { forgotPasswordOtpBlockedUntil: 1 };
+  }
+
+  const updatedUser = await updateOne({
+    model: UserModel,
+    filters: { _id: user._id },
+    data,
+  });
+  if (!updatedUser.matchedCount) {
+    return next(
+      new Error("failed to send forgot password otp", { cause: 400 }),
+    );
+  }
+
+  emailEvent.emit("send-email-forgot-password", {
+    to: email,
+    subject: "Forgot Password",
+    otp,
+    userName: user.userName,
+  });
+
+  return successResponse({
+    res,
+    statusCode: 200,
+    message: "Forgot password otp sent successfully",
+  });
+});
+
+export const verifyForgotPasswordOtp = asyncHandler(async (req, res, next) => {
+  const { email, otp } = req.body;
+  const now = new Date();
+
+  const user = await findOne({
+    model: UserModel,
+    filters: {
+      email,
+      deletedAt: { $exists: false },
+      confirmEmail: { $exists: true },
+      forgotPasswordOtp: { $exists: true },
+    },
+  });
+  if (!user) {
+    return next(new Error("invalid email or otp", { cause: 404 }));
+  }
+
+  if (
+    !user.forgotPasswordOtpExpiresAt ||
+    user.forgotPasswordOtpExpiresAt < now
+  ) {
+    return next(
+      new Error("otp expired, please request a new otp", { cause: 400 }),
+    );
+  }
+
+  const comparedOtp = compareHash({
+    plainText: otp,
+    hash: user.forgotPasswordOtp,
+  });
+  if (!comparedOtp) {
+    return next(new Error("invalid otp", { cause: 404 }));
+  }
+
+  return successResponse({
+    res,
+    statusCode: 200,
+    message: "Forgot password otp verified successfully",
+  });
+});
+
+export const resetPassword = asyncHandler(async (req, res, next) => {
+  const { email, otp, password } = req.body;
+  const now = new Date();
+
+  const user = await findOne({
+    model: UserModel,
+    filters: {
+      email,
+      forgotPasswordOtp: { $exists: true },
+      deletedAt: { $exists: false },
+      confirmEmail: { $exists: true },
+    },
+  });
+  if (!user) {
+    return next(new Error("invalid email or email not found", { cause: 404 }));
+  }
+
+  if (
+    !user.forgotPasswordOtpExpiresAt ||
+    user.forgotPasswordOtpExpiresAt < now
+  ) {
+    return next(
+      new Error("otp expired, please request a new otp", { cause: 400 }),
+    );
+  }
+
+  const compareOtp = compareHash({
+    plainText: otp,
+    hash: user.forgotPasswordOtp,
+  });
+  if (!compareOtp) {
+    return next(new Error("invalid otp", { cause: 404 }));
+  }
+
+  if (compareHash({ plainText: password, hash: user.password })) {
+    return next(
+      new Error("Password cannot be the same as the current password", {
+        cause: 409,
+      }),
+    );
+  }
+
+  if (user?.oldPasswords?.length) {
+    for (const oldPassword of user.oldPasswords) {
+      if (compareHash({ plainText: password, hash: oldPassword })) {
+        return next(
+          new Error("Password cannot be the same as the previous passwords", {
+            cause: 409,
+          }),
+        );
+      }
+    }
+  }
+
+  const updatedUser = await updateOne({
+    model: UserModel,
+    filters: {
+      _id: user._id,
+      forgotPasswordOtp: { $exists: true },
+    },
+    data: {
+      password: generateHash({ plainText: password }),
+      $push: { oldPasswords: { $each: [user.password], $slice: -3 } },
+      $unset: {
+        forgotPasswordOtp: 1,
+        forgotPasswordOtpExpiresAt: 1,
+        forgotPasswordOtpAttempts: 1,
+        forgotPasswordOtpBlockedUntil: 1,
+      },
+      $inc: { __v: 1 },
+    },
+  });
+  if (!updatedUser.matchedCount) {
+    return next(new Error("failed to reset password", { cause: 400 }));
+  }
+
+  return successResponse({
+    res,
+    statusCode: 200,
+    message: "Password reset successfully",
+  });
+});

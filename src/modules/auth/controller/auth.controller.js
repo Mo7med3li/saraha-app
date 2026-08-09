@@ -9,6 +9,9 @@ import {
   signup,
   confirmEmail,
   resendConfirmEmail,
+  sendForgotPasswordOtp,
+  verifyForgotPasswordOtp,
+  resetPassword,
 } from "../services/auth.service.js";
 import {
   confirmEmailSchema,
@@ -16,7 +19,10 @@ import {
   loginSchema,
   refreshTokenSchema,
   resendConfirmEmailSchema,
+  resetPasswordSchema,
+  sendForgotPasswordOtpSchema,
   signupSchema,
+  verifyForgotPasswordOtpSchema,
 } from "../schema/auth.schema.js";
 import { validationMiddleware } from "../../../middleware/validation.middleware.js";
 
@@ -37,6 +43,21 @@ authRouter.post(
   "/signup-google",
   validationMiddleware(googleAuthSchema),
   googleLoginOrSignup,
+);
+authRouter.patch(
+  "/send-forgot-password-otp",
+  validationMiddleware(sendForgotPasswordOtpSchema),
+  sendForgotPasswordOtp,
+);
+authRouter.patch(
+  "/verify-forgot-password-otp",
+  validationMiddleware(verifyForgotPasswordOtpSchema),
+  verifyForgotPasswordOtp,
+);
+authRouter.patch(
+  "/reset-password",
+  validationMiddleware(resetPasswordSchema),
+  resetPassword,
 );
 authRouter.post(
   "/login-google",
