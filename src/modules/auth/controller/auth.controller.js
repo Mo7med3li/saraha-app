@@ -18,6 +18,7 @@ import {
   confirmEmailSchema,
   googleAuthSchema,
   loginSchema,
+  logoutSchema,
   refreshTokenSchema,
   resendConfirmEmailSchema,
   resetPasswordSchema,
@@ -66,7 +67,12 @@ authRouter.post(
   googleLogin,
 );
 
-authRouter.post("/logout", authMiddleware(), logout);
+authRouter.post(
+  "/logout",
+  validationMiddleware(logoutSchema),
+  authMiddleware(),
+  logout,
+);
 
 authRouter.get(
   "/refresh-token",

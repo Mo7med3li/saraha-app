@@ -8,7 +8,10 @@ import {
   generateHash,
 } from "../../../lib/utils/security/hash.security.js";
 import { generateTokens } from "../../../lib/utils/security/token.security.js";
-import { PROVIDERS_ENUM } from "../../../lib/constants/constants.js";
+import {
+  LOGOUT_ENUM,
+  PROVIDERS_ENUM,
+} from "../../../lib/constants/constants.js";
 import emailEvent from "../../../lib/utils/events/email.event.js";
 import { customAlphabet } from "nanoid";
 import TokenModel from "../../../db/models/token.model.js";
@@ -71,20 +74,36 @@ export const signup = asyncHandler(async (req, res, next) => {
 
 export const logout = asyncHandler(async (req, res, next) => {
   const { decoded } = req;
-  await createOne({
-    model: TokenModel,
-    data: [
-      {
-        jti: decoded.jti,
-        userId: decoded._id,
-        expiresAt:
-          decoded.iat + Number(process.env.ACCESS_TOKEN_EXPIRATION_TIME),
-      },
-    ],
-  });
+
+  let statusCode = 200;
+
+  switch (req.body?.flag) {
+    case LOGOUT_ENUM.SIGNED_OUT_FROM_ALL:
+      await updateOne({
+        model: UserModel,
+        filters: { _id: decoded._id },
+        data: { changeCredentialsTime: new Date() },
+      });
+      break;
+    default:
+      await createOne({
+        model: TokenModel,
+        data: [
+          {
+            jti: decoded.jti,
+            userId: decoded._id,
+            expiresAt:
+              decoded.iat + Number(process.env.ACCESS_TOKEN_EXPIRATION_TIME),
+          },
+        ],
+      });
+      statusCode = 201;
+      break;
+  }
+
   return successResponse({
     res,
-    statusCode: 201,
+    statusCode,
     message: "User logged out successfully",
   });
 });
