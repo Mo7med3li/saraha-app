@@ -13,6 +13,13 @@ export const authMiddleware = ({
       authorization,
       tokenType,
     });
+    if (user?.changeCredentialsTime?.getTime() > decoded.iat * 1000) {
+      return next(
+        new Error("credentials expired, you need to login again", {
+          cause: 401,
+        }),
+      );
+    }
     req.user = user;
     req.decoded = decoded;
     next();
