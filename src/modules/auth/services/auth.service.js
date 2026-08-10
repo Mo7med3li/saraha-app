@@ -11,6 +11,7 @@ import { generateTokens } from "../../../lib/utils/security/token.security.js";
 import { PROVIDERS_ENUM } from "../../../lib/constants/constants.js";
 import emailEvent from "../../../lib/utils/events/email.event.js";
 import { customAlphabet } from "nanoid";
+import TokenModel from "../../../db/models/token.model.js";
 
 const OTP_MAX_ATTEMPTS = 5;
 const OTP_BLOCK_MS = 1000 * 60 * 5;
@@ -65,6 +66,26 @@ export const signup = asyncHandler(async (req, res, next) => {
     statusCode: 201,
     message: "User created successfully",
     data: { user },
+  });
+});
+
+export const logout = asyncHandler(async (req, res, next) => {
+  const { decoded } = req;
+  await createOne({
+    model: TokenModel,
+    data: [
+      {
+        jti: decoded.jti,
+        userId: decoded._id,
+        expiresAt:
+          decoded.iat + Number(process.env.ACCESS_TOKEN_EXPIRATION_TIME),
+      },
+    ],
+  });
+  return successResponse({
+    res,
+    statusCode: 201,
+    message: "User logged out successfully",
   });
 });
 

@@ -12,6 +12,7 @@ import {
   sendForgotPasswordOtp,
   verifyForgotPasswordOtp,
   resetPassword,
+  logout,
 } from "../services/auth.service.js";
 import {
   confirmEmailSchema,
@@ -64,6 +65,8 @@ authRouter.post(
   validationMiddleware(googleAuthSchema),
   googleLogin,
 );
+
+authRouter.post("/logout", authMiddleware(), logout);
 
 authRouter.get(
   "/refresh-token",
