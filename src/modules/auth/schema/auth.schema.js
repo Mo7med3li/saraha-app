@@ -63,7 +63,7 @@ export const resetPasswordSchema = {
   body: Joi.object().keys({
     email: generalFieldsSchema.email.required(),
     otp: generalFieldsSchema.otp.required(),
-    password: generalFieldsSchema.password.required(),
+    newPassword: generalFieldsSchema.password.required(),
     confirmPassword: generalFieldsSchema.confirmPassword.required(),
   }),
 };

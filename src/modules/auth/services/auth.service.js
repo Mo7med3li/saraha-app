@@ -359,6 +359,7 @@ export const sendForgotPasswordOtp = asyncHandler(async (req, res, next) => {
       email,
       deletedAt: { $exists: false },
       confirmEmail: { $exists: true },
+      providers: PROVIDERS_ENUM.SYSTEM,
     },
   });
   if (!user) {
@@ -451,6 +452,7 @@ export const verifyForgotPasswordOtp = asyncHandler(async (req, res, next) => {
       deletedAt: { $exists: false },
       confirmEmail: { $exists: true },
       forgotPasswordOtp: { $exists: true },
+      providers: PROVIDERS_ENUM.SYSTEM,
     },
   });
   if (!user) {
@@ -482,7 +484,7 @@ export const verifyForgotPasswordOtp = asyncHandler(async (req, res, next) => {
 });
 
 export const resetPassword = asyncHandler(async (req, res, next) => {
-  const { email, otp, password } = req.body;
+  const { email, otp, newPassword } = req.body;
   const now = new Date();
 
   const user = await findOne({
@@ -492,6 +494,7 @@ export const resetPassword = asyncHandler(async (req, res, next) => {
       forgotPasswordOtp: { $exists: true },
       deletedAt: { $exists: false },
       confirmEmail: { $exists: true },
+      providers: PROVIDERS_ENUM.SYSTEM,
     },
   });
   if (!user) {
@@ -515,7 +518,7 @@ export const resetPassword = asyncHandler(async (req, res, next) => {
     return next(new Error("invalid otp", { cause: 404 }));
   }
 
-  if (compareHash({ plainText: password, hash: user.password })) {
+  if (compareHash({ plainText: newPassword, hash: user.password })) {
     return next(
       new Error("Password cannot be the same as the current password", {
         cause: 409,
@@ -525,7 +528,7 @@ export const resetPassword = asyncHandler(async (req, res, next) => {
 
   if (user?.oldPasswords?.length) {
     for (const oldPassword of user.oldPasswords) {
-      if (compareHash({ plainText: password, hash: oldPassword })) {
+      if (compareHash({ plainText: newPassword, hash: oldPassword })) {
         return next(
           new Error("Password cannot be the same as the previous passwords", {
             cause: 409,
@@ -542,7 +545,7 @@ export const resetPassword = asyncHandler(async (req, res, next) => {
       forgotPasswordOtp: { $exists: true },
     },
     data: {
-      password: generateHash({ plainText: password }),
+      password: generateHash({ plainText: newPassword }),
       $push: { oldPasswords: { $each: [user.password], $slice: -3 } },
       $unset: {
         forgotPasswordOtp: 1,
