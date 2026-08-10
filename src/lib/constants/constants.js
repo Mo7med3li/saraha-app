@@ -22,3 +22,9 @@ export const PROVIDERS_ENUM = {
   SYSTEM: "system",
   GOOGLE: "google",
 };
+
+export const LOGOUT_ENUM = {
+  SIGNED_OUT_FROM_ALL: "signoutFromAll",
+  SIGNED_OUT_: "signout",
+  STAY_LOGGED_IN: "stayLoggedIn",
+};

@@ -61,6 +61,7 @@ const userSchema = new Mongoose.Schema(
         return this.providers === PROVIDERS_ENUM.SYSTEM;
       },
     },
+    changeCredentialsTime: Date,
     confirmEmail: Date,
     confirmEmailOtp: String,
     confirmEmailOtpExpiresAt: Date,
