@@ -1,16 +1,20 @@
 import jwt from "jsonwebtoken";
-import { findById } from "../../../db/db.service.js";
+import { findById, findOne } from "../../../db/db.service.js";
 import UserModel from "../../../db/models/user.model.js";
 import {
   ROLES_ENUM,
   SIGNATURE_LEVEL_LABEL,
   TOKEN_TYPES_ENUM,
 } from "../../constants/constants.js";
+import { nanoid } from "nanoid";
+import TokenModel from "../../../db/models/token.model.js";
 
 export const generateToken = ({
   payload = {},
   signature = process.env.USER_JWT_SECRET,
-  options = { expiresIn: 60 * 60 },
+  options = {
+    expiresIn: Number(process.env.ACCESS_TOKEN_EXPIRATION_TIME),
+  },
 }) => {
   return jwt.sign(payload, signature, options);
 };
@@ -45,25 +49,43 @@ export const decodeToken = async ({
 
   // get the signature based on the bearer level
   const { accessSignature, refreshSignature } = getSignature({ bearer });
-  const decodedToken = verifyToken({
+  const decoded = verifyToken({
     token,
     signature:
       tokenType === TOKEN_TYPES_ENUM.ACCESS
         ? accessSignature
         : refreshSignature,
   });
-  if (!decodedToken?._id) {
+  console.log("decodeToken", decoded);
+  if (!decoded?._id) {
     return next(new Error("invalid token", { cause: 401 }));
   }
-  const { _id } = decodedToken;
+  const { _id } = decoded;
+  if (
+    decoded.jti &&
+    (await findOne({
+      model: TokenModel,
+      filters: {
+        jti: decoded.jti,
+      },
+    }))
+  ) {
+    return next(
+      new Error("this token is logged out before and cannot be used again", {
+        cause: 401,
+      }),
+    );
+  }
   const user = await findById({
     model: UserModel,
     id: _id,
   });
+  console.log("user", user);
   if (!user) {
     return next(new Error("user not found", { cause: 404 }));
   }
-  return user;
+
+  return { user, decoded };
 };
 
 export const generateTokens = async ({ user }) => {
@@ -74,12 +96,13 @@ export const generateTokens = async ({ user }) => {
   const { accessSignature, refreshSignature } = getSignature({
     bearer: signatureLevel,
   });
-
+  const jwtid = nanoid();
   const token = generateToken({
     payload: { _id: user._id },
     signature: accessSignature,
     options: {
-      expiresIn: 60 * 30,
+      expiresIn: Number(process.env.ACCESS_TOKEN_EXPIRATION_TIME),
+      jwtid,
     },
   });
 
@@ -87,7 +110,8 @@ export const generateTokens = async ({ user }) => {
     payload: { _id: user._id },
     signature: refreshSignature,
     options: {
-      expiresIn: "1y",
+      expiresIn: Number(process.env.REFRESH_TOKEN_EXPIRATION_TIME),
+      jwtid,
     },
   });
   return { accessToken: token, refreshToken };
