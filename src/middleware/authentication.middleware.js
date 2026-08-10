@@ -8,8 +8,13 @@ export const authMiddleware = ({
   return asyncHandler(async (req, res, next) => {
     const { authorization } = req.headers;
 
-    const user = await decodeToken({ next, authorization, tokenType });
+    const { user, decoded } = await decodeToken({
+      next,
+      authorization,
+      tokenType,
+    });
     req.user = user;
+    req.decoded = decoded;
     next();
   });
 };
@@ -28,7 +33,13 @@ export const auth = ({ tokenType = TOKEN_TYPES_ENUM.ACCESS, roles = [] }) => {
   return asyncHandler(async (req, res, next) => {
     const { authorization } = req.headers;
 
-    req.user = await decodeToken({ next, authorization, tokenType });
+    const { user, decodeToken } = await decodeToken({
+      next,
+      authorization,
+      tokenType,
+    });
+    req.user = user;
+    req.decodeToken = decodeToken;
 
     if (!roles.includes(req.user?.role)) {
       return next(new Error("unauthorized", { cause: 403 }));
