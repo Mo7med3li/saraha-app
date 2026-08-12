@@ -5,7 +5,7 @@ import {
   updateOne,
 } from "../../../db/db.service.js";
 import UserModel from "../../../db/models/user.model.js";
-import { ROLES_ENUM } from "../../../lib/constants/constants.js";
+import { LOGOUT_ENUM, ROLES_ENUM } from "../../../lib/constants/constants.js";
 import { asyncHandler, successResponse } from "../../../lib/utils/response.js";
 import {
   decryption,
@@ -15,6 +15,7 @@ import {
   compareHash,
   generateHash,
 } from "../../../lib/utils/security/hash.security.js";
+import { createRevokedToken } from "../../../lib/utils/security/token.security.js";
 
 // Get user by ID service
 export const getUserById = asyncHandler(async (req, res, next) => {
@@ -164,7 +165,6 @@ export const restoreAccount = asyncHandler(async (req, res, next) => {
     select: "-password -confirmEmailOtpAttempts",
   });
 
-  console.log(updatedUser);
   if (!updatedUser) {
     return next(
       new Error("Failed to restore account or account not freezed", {
@@ -206,7 +206,8 @@ export const deleteAccount = asyncHandler(async (req, res, next) => {
 
 export const updatePassword = asyncHandler(async (req, res, next) => {
   const { user } = req;
-  const { oldPassword, password } = req.body;
+  const { oldPassword, password, flag } = req.body;
+  let updatedData = {};
   if (!compareHash({ plainText: oldPassword, hash: user.password })) {
     return next(new Error("Old password is incorrect", { cause: 400 }));
   }
@@ -222,11 +223,22 @@ export const updatePassword = asyncHandler(async (req, res, next) => {
       }
     }
   }
+  switch (flag) {
+    case LOGOUT_ENUM.SIGNED_OUT_FROM_ALL:
+      updatedData.changeCredentialsTime = new Date();
+      break;
+    case LOGOUT_ENUM.SIGNED_OUT_FROM_CURRENT_DEVICE:
+      await createRevokedToken({ decoded: req.decoded });
+      break;
+    default:
+      break;
+  }
   const updatedUser = await findAndUpdate({
     model: UserModel,
     filters: { _id: user._id },
     data: {
       password: await generateHash({ plainText: password }),
+      ...updatedData,
       $push: { oldPasswords: { $each: [user.password], $slice: -3 } },
     },
     select: "-password -confirmEmailOtpAttempts",
