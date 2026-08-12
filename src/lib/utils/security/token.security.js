@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { findById, findOne } from "../../../db/db.service.js";
+import { createOne, findById, findOne } from "../../../db/db.service.js";
 import UserModel from "../../../db/models/user.model.js";
 import {
   ROLES_ENUM,
@@ -56,7 +56,6 @@ export const decodeToken = async ({
         ? accessSignature
         : refreshSignature,
   });
-  console.log("decodeToken", decoded);
   if (!decoded?._id) {
     return next(new Error("invalid token", { cause: 401 }));
   }
@@ -80,7 +79,7 @@ export const decodeToken = async ({
     model: UserModel,
     id: _id,
   });
-  console.log("user", user);
+
   if (!user) {
     return next(new Error("user not found", { cause: 404 }));
   }
@@ -115,4 +114,19 @@ export const generateTokens = async ({ user }) => {
     },
   });
   return { accessToken: token, refreshToken };
+};
+
+export const createRevokedToken = async ({ decoded }) => {
+  await createOne({
+    model: TokenModel,
+    data: [
+      {
+        jti: decoded.jti,
+        userId: decoded._id,
+        expiresAt:
+          decoded.iat + Number(process.env.ACCESS_TOKEN_EXPIRATION_TIME),
+      },
+    ],
+  });
+  return true;
 };
