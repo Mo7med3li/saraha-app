@@ -38,14 +38,6 @@ export const googleAuthSchema = {
   }),
 };
 
-export const refreshTokenSchema = {
-  headers: Joi.object()
-    .keys({
-      authorization: Joi.string().required(),
-    })
-    .unknown(true),
-};
-
 export const sendForgotPasswordOtpSchema = {
   body: Joi.object().keys({
     email: generalFieldsSchema.email.required(),

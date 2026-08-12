@@ -15,7 +15,10 @@ import {
   compareHash,
   generateHash,
 } from "../../../lib/utils/security/hash.security.js";
-import { createRevokedToken } from "../../../lib/utils/security/token.security.js";
+import {
+  createRevokedToken,
+  generateTokens,
+} from "../../../lib/utils/security/token.security.js";
 
 // Get user by ID service
 export const getUserById = asyncHandler(async (req, res, next) => {
@@ -32,6 +35,17 @@ export const getUserById = asyncHandler(async (req, res, next) => {
   });
 });
 
+export const refreshToken = asyncHandler(async (req, res, next) => {
+  const { user } = req;
+
+  const { accessToken, refreshToken } = await generateTokens({ user });
+  return successResponse({
+    res,
+    statusCode: 200,
+    message: "Refresh token generated successfully",
+    data: { accessToken, refreshToken },
+  });
+});
 export const getUserSharedData = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const user = await findOne({

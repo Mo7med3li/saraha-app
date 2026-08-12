@@ -1,11 +1,8 @@
 import { Router } from "express";
-import { TOKEN_TYPES_ENUM } from "../../../lib/constants/constants.js";
-import { authMiddleware } from "../../../middleware/authentication.middleware.js";
 import {
   googleLogin,
   googleLoginOrSignup,
   login,
-  refreshToken,
   signup,
   confirmEmail,
   resendConfirmEmail,
@@ -17,7 +14,6 @@ import {
   confirmEmailSchema,
   googleAuthSchema,
   loginSchema,
-  refreshTokenSchema,
   resendConfirmEmailSchema,
   resetPasswordSchema,
   sendForgotPasswordOtpSchema,
@@ -65,10 +61,4 @@ authRouter.post(
   googleLogin,
 );
 
-authRouter.get(
-  "/refresh-token",
-  validationMiddleware(refreshTokenSchema),
-  authMiddleware({ tokenType: TOKEN_TYPES_ENUM.REFRESH }),
-  refreshToken,
-);
 export default authRouter;

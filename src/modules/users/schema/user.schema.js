@@ -55,3 +55,11 @@ export const logoutSchema = {
     flag: generalFieldsSchema.flag,
   }),
 };
+
+export const refreshTokenSchema = {
+  headers: Joi.object()
+    .keys({
+      authorization: Joi.string().required(),
+    })
+    .unknown(true),
+};

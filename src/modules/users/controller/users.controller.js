@@ -12,18 +12,21 @@ import {
   deleteAccount,
   updatePassword,
   logout,
+  refreshToken,
 } from "../services/users.service.js";
 import { authorize } from "../../../authorize/authorize.js";
 import {
   deleteAccountSchema,
   freezeAccountSchema,
   logoutSchema,
+  refreshTokenSchema,
   restoreAccountSchema,
   updatePasswordSchema,
   userSharedDataSchema,
   userUpdateInfoSchema,
 } from "../schema/user.schema.js";
 import { validationMiddleware } from "../../../middleware/validation.middleware.js";
+import { TOKEN_TYPES_ENUM } from "../../../lib/constants/constants.js";
 
 const usersRouter = Router();
 
@@ -32,6 +35,13 @@ usersRouter.get(
   authMiddleware(),
   authorizeMiddleware({ roles: authorize.profile }),
   getUserById,
+);
+
+usersRouter.get(
+  "/refresh-token",
+  validationMiddleware(refreshTokenSchema),
+  authMiddleware({ tokenType: TOKEN_TYPES_ENUM.REFRESH }),
+  refreshToken,
 );
 usersRouter.get(
   "/:id",

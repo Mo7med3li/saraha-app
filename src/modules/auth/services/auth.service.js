@@ -7,17 +7,10 @@ import {
   compareHash,
   generateHash,
 } from "../../../lib/utils/security/hash.security.js";
-import {
-  createRevokedToken,
-  generateTokens,
-} from "../../../lib/utils/security/token.security.js";
-import {
-  LOGOUT_ENUM,
-  PROVIDERS_ENUM,
-} from "../../../lib/constants/constants.js";
+import { generateTokens } from "../../../lib/utils/security/token.security.js";
+import { PROVIDERS_ENUM } from "../../../lib/constants/constants.js";
 import emailEvent from "../../../lib/utils/events/email.event.js";
 import { customAlphabet } from "nanoid";
-import TokenModel from "../../../db/models/token.model.js";
 
 const OTP_MAX_ATTEMPTS = 5;
 const OTP_BLOCK_MS = 1000 * 60 * 5;
@@ -112,18 +105,6 @@ export const login = asyncHandler(async (req, res, next) => {
     res,
     statusCode: 200,
     message: "Login successful",
-    data: { accessToken, refreshToken },
-  });
-});
-
-export const refreshToken = asyncHandler(async (req, res, next) => {
-  const { user } = req;
-
-  const { accessToken, refreshToken } = await generateTokens({ user });
-  return successResponse({
-    res,
-    statusCode: 200,
-    message: "Refresh token generated successfully",
     data: { accessToken, refreshToken },
   });
 });
