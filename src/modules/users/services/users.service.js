@@ -117,6 +117,7 @@ export const freezeAccount = asyncHandler(async (req, res, next) => {
     data: {
       deletedAt: new Date(),
       deletedBy: user._id,
+      changeCredentialsTime: new Date(),
       $unset: {
         restoredAt: 1,
         restoredBy: 1,

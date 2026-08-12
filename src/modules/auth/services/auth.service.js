@@ -121,6 +121,10 @@ export const login = asyncHandler(async (req, res, next) => {
     return next(new Error("please confirm your email", { cause: 400 }));
   }
 
+  if (user.deletedAt) {
+    return next(new Error("this account is deleted", { cause: 400 }));
+  }
+
   const matched = await compareHash({
     plainText: password,
     hash: user?.password,
