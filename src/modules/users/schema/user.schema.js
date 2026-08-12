@@ -46,6 +46,7 @@ export const updatePasswordSchema = {
           "any.invalid": "New password must be different from old password",
         }),
       confirmPassword: generalFieldsSchema.confirmPassword.required(),
+      flag: generalFieldsSchema.flag,
     })
     .required(),
 };

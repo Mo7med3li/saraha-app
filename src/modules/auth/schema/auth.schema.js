@@ -1,6 +1,5 @@
 import Joi from "joi";
 import { generalFieldsSchema } from "../../../lib/constants/schema.constant.js";
-import { LOGOUT_ENUM } from "../../../lib/constants/constants.js";
 
 // Login schema
 export const loginSchema = {
@@ -71,8 +70,6 @@ export const resetPasswordSchema = {
 
 export const logoutSchema = {
   body: Joi.object().keys({
-    flag: Joi.string()
-      .valid(...Object.values(LOGOUT_ENUM))
-      .default(LOGOUT_ENUM.STAY_LOGGED_IN),
+    flag: generalFieldsSchema.flag,
   }),
 };
