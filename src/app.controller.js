@@ -5,6 +5,7 @@ import { globalErrorHandler } from "./lib/utils/response.js";
 import authRouter from "./modules/auth/controller/auth.controller.js";
 import messagesRouter from "./modules/messages/controller/messages.controller.js";
 import userRouter from "./modules/users/controller/users.controller.js";
+import path from "path";
 export const bootstrap = async () => {
   const app = express();
   const port = process.env.PORT || 5000;
@@ -13,6 +14,8 @@ export const bootstrap = async () => {
   // CORS
   app.use(cors());
 
+  // serve static files
+  app.use("/uploads", express.static(path.resolve("./src/uploads")));
   //   root route
   app.get("/", (req, res) => {
     res.json({ message: "welcome to the application" });
