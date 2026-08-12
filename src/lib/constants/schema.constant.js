@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { Gender_Enum } from "./constants.js";
+import { Gender_Enum, LOGOUT_ENUM } from "./constants.js";
 import { Types } from "mongoose";
 
 export const generalFieldsSchema = {
@@ -66,4 +66,7 @@ export const generalFieldsSchema = {
       Types.ObjectId.isValid(value) || helpers.message("invalid id format")
     );
   }),
+  flag: Joi.string()
+    .valid(...Object.values(LOGOUT_ENUM))
+    .default(LOGOUT_ENUM.STAY_LOGGED_IN),
 };
