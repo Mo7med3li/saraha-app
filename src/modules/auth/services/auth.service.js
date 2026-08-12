@@ -7,7 +7,10 @@ import {
   compareHash,
   generateHash,
 } from "../../../lib/utils/security/hash.security.js";
-import { generateTokens } from "../../../lib/utils/security/token.security.js";
+import {
+  createRevokedToken,
+  generateTokens,
+} from "../../../lib/utils/security/token.security.js";
 import {
   LOGOUT_ENUM,
   PROVIDERS_ENUM,
@@ -86,17 +89,7 @@ export const logout = asyncHandler(async (req, res, next) => {
       });
       break;
     default:
-      await createOne({
-        model: TokenModel,
-        data: [
-          {
-            jti: decoded.jti,
-            userId: decoded._id,
-            expiresAt:
-              decoded.iat + Number(process.env.ACCESS_TOKEN_EXPIRATION_TIME),
-          },
-        ],
-      });
+      await createRevokedToken({ decoded });
       statusCode = 201;
       break;
   }
@@ -593,6 +586,7 @@ export const resetPassword = asyncHandler(async (req, res, next) => {
         forgotPasswordOtpAttempts: 1,
         forgotPasswordOtpBlockedUntil: 1,
       },
+      changeCredentialsTime: new Date(),
       $inc: { __v: 1 },
     },
   });
