@@ -13,6 +13,7 @@ import {
   updatePassword,
   logout,
   refreshToken,
+  profileImageUpload,
 } from "../services/users.service.js";
 import { authorize } from "../../../authorize/authorize.js";
 import {
@@ -27,6 +28,7 @@ import {
 } from "../schema/user.schema.js";
 import { validationMiddleware } from "../../../middleware/validation.middleware.js";
 import { TOKEN_TYPES_ENUM } from "../../../lib/constants/constants.js";
+import { localFileUpload } from "../../../lib/utils/multer/local.multer.js";
 
 const usersRouter = Router();
 
@@ -89,6 +91,14 @@ usersRouter.delete(
   authorizeMiddleware({ roles: authorize.deleteAccount }),
   validationMiddleware(deleteAccountSchema),
   deleteAccount,
+);
+
+usersRouter.patch(
+  "/profile-image",
+  authMiddleware(),
+
+  localFileUpload({ customPath: "users" }).single("profileImage"),
+  profileImageUpload,
 );
 
 export default usersRouter;

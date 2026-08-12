@@ -293,3 +293,24 @@ export const logout = asyncHandler(async (req, res, next) => {
     message: "User logged out successfully",
   });
 });
+
+export const profileImageUpload = asyncHandler(async (req, res, next) => {
+  const { user } = req;
+  const { file } = req;
+  // const { path } = file;
+  const updatedUser = await findAndUpdate({
+    model: UserModel,
+    filters: { _id: user._id },
+    data: { picture: file.finalPath },
+    select: "-password -confirmEmailOtpAttempts -oldPasswords",
+  });
+  if (!updatedUser) {
+    return next(new Error("Failed to update profile image", { cause: 400 }));
+  }
+  return successResponse({
+    res,
+    statusCode: 200,
+    message: "Profile image uploaded successfully",
+    data: { user: updatedUser },
+  });
+});
