@@ -253,3 +253,29 @@ export const updatePassword = asyncHandler(async (req, res, next) => {
     message: "Password updated successfully",
   });
 });
+
+export const logout = asyncHandler(async (req, res, next) => {
+  const { decoded } = req;
+
+  let statusCode = 200;
+
+  switch (req.body?.flag) {
+    case LOGOUT_ENUM.SIGNED_OUT_FROM_ALL:
+      await updateOne({
+        model: UserModel,
+        filters: { _id: decoded._id },
+        data: { changeCredentialsTime: new Date() },
+      });
+      break;
+    default:
+      await createRevokedToken({ decoded });
+      statusCode = 201;
+      break;
+  }
+
+  return successResponse({
+    res,
+    statusCode,
+    message: "User logged out successfully",
+  });
+});

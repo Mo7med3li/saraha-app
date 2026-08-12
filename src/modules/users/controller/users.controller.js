@@ -11,11 +11,13 @@ import {
   restoreAccount,
   deleteAccount,
   updatePassword,
+  logout,
 } from "../services/users.service.js";
 import { authorize } from "../../../authorize/authorize.js";
 import {
   deleteAccountSchema,
   freezeAccountSchema,
+  logoutSchema,
   restoreAccountSchema,
   updatePasswordSchema,
   userSharedDataSchema,
@@ -49,6 +51,13 @@ usersRouter.patch(
   authMiddleware(),
   validationMiddleware(updatePasswordSchema),
   updatePassword,
+);
+
+usersRouter.post(
+  "/logout",
+  authMiddleware(),
+  validationMiddleware(logoutSchema),
+  logout,
 );
 
 usersRouter.delete(

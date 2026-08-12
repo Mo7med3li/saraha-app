@@ -67,9 +67,3 @@ export const resetPasswordSchema = {
     confirmPassword: generalFieldsSchema.confirmPassword.required(),
   }),
 };
-
-export const logoutSchema = {
-  body: Joi.object().keys({
-    flag: generalFieldsSchema.flag,
-  }),
-};

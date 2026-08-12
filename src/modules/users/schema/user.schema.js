@@ -50,3 +50,8 @@ export const updatePasswordSchema = {
     })
     .required(),
 };
+export const logoutSchema = {
+  body: Joi.object().keys({
+    flag: generalFieldsSchema.flag,
+  }),
+};
