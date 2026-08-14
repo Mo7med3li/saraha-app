@@ -28,3 +28,12 @@ export const LOGOUT_ENUM = {
   SIGNED_OUT_FROM_CURRENT_DEVICE: "signout",
   STAY_LOGGED_IN: "stayLoggedIn",
 };
+
+export const FILE_FILTER_VALIDATION = {
+  image: ["image/jpeg", "image/webp"],
+  document: [
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ],
+};

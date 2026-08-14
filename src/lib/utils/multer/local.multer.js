@@ -2,16 +2,18 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-export const localFileUpload = ({ customPath = "general" } = {}) => {
-  let basePath = `uploads/${customPath}`;
+export const localFileUpload = ({
+  customPath = "general",
+  filterValidation = [],
+} = {}) => {
+  const getBasePath = ({ user } = {}) =>
+    user?._id
+      ? `uploads/${customPath}/${user._id}`
+      : `uploads/${customPath}`;
 
   const storage = multer.diskStorage({
     destination: function (req, file, callback) {
-      const { user } = req;
-      if (user?._id) {
-        basePath += `/${user._id}`;
-      }
-      const uploadPath = path.resolve(`./src/${basePath}`);
+      const uploadPath = path.resolve(`./src/${getBasePath(req)}`);
       if (!fs.existsSync(uploadPath)) {
         fs.mkdirSync(uploadPath, { recursive: true });
       }
@@ -22,15 +24,31 @@ export const localFileUpload = ({ customPath = "general" } = {}) => {
       const uniqueFileName =
         Date.now() + "__" + Math.random() + "__" + file.originalname;
 
-      file.finalPath = basePath + "/" + uniqueFileName;
+      file.finalPath = getBasePath(req) + "/" + uniqueFileName;
       callback(null, uniqueFileName);
     },
   });
+
+  const fileFilter = function (req, file, callback) {
+    if (filterValidation.includes(file.mimetype)) {
+      return callback(null, true);
+    }
+    return callback(
+      new Error(
+        `Invalid file type. Allowed types are: ${filterValidation.join(", ")}`,
+        {
+          cause: 400,
+        },
+      ),
+      false,
+    );
+  };
   return multer({
     dest: "./temp",
-    // limits: {
-    //   fileSize: 1024 * 1024 * 5, // 5MB
-    // },
+    limits: {
+      fileSize: 1024 * 1024 * 5, // 5MB
+    },
+    fileFilter,
     storage,
   });
 };

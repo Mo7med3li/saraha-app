@@ -27,7 +27,10 @@ import {
   userUpdateInfoSchema,
 } from "../schema/user.schema.js";
 import { validationMiddleware } from "../../../middleware/validation.middleware.js";
-import { TOKEN_TYPES_ENUM } from "../../../lib/constants/constants.js";
+import {
+  FILE_FILTER_VALIDATION,
+  TOKEN_TYPES_ENUM,
+} from "../../../lib/constants/constants.js";
 import { localFileUpload } from "../../../lib/utils/multer/local.multer.js";
 
 const usersRouter = Router();
@@ -97,7 +100,10 @@ usersRouter.patch(
   "/profile-image",
   authMiddleware(),
 
-  localFileUpload({ customPath: "users" }).single("profileImage"),
+  localFileUpload({
+    customPath: "users",
+    filterValidation: FILE_FILTER_VALIDATION.image,
+  }).single("profileImage"),
   profileImageUpload,
 );
 
