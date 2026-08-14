@@ -30,7 +30,7 @@ export const LOGOUT_ENUM = {
 };
 
 export const FILE_FILTER_VALIDATION = {
-  image: ["image/jpeg", "image/webp"],
+  image: ["image/jpeg", "image/png", "image/jpg", "image/webp"],
   document: [
     "application/pdf",
     "application/msword",

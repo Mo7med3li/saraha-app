@@ -69,4 +69,15 @@ export const generalFieldsSchema = {
   flag: Joi.string()
     .valid(...Object.values(LOGOUT_ENUM))
     .default(LOGOUT_ENUM.STAY_LOGGED_IN),
+  file: {
+    fieldname: Joi.string().required(),
+    originalname: Joi.string().required(),
+    encoding: Joi.string().required(),
+    destination: Joi.string().required(),
+    mimetype: Joi.string().required(),
+    finalPath: Joi.string().required(),
+    filename: Joi.string().required(),
+    path: Joi.string().required(),
+    size: Joi.number().positive().required(),
+  },
 };
