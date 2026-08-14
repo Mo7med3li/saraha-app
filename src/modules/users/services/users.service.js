@@ -314,3 +314,47 @@ export const profileImageUpload = asyncHandler(async (req, res, next) => {
     data: { user: updatedUser },
   });
 });
+
+export const profileGalleryUpload = asyncHandler(async (req, res, next) => {
+  const { user } = req;
+  const { files } = req;
+
+  const updatedUser = await findAndUpdate({
+    model: UserModel,
+    filters: { _id: user._id },
+    data: { profileGallery: files.map((file) => file.finalPath) },
+    select: "-password -confirmEmailOtpAttempts -oldPasswords",
+  });
+  if (!updatedUser) {
+    return next(new Error("Failed to update profile gallery", { cause: 400 }));
+  }
+  return successResponse({
+    res,
+    statusCode: 200,
+    message: "Profile gallery uploaded successfully",
+    data: { user: updatedUser },
+  });
+});
+
+// export const profileGalleryAndCertificationsUpload = asyncHandler(
+//   async (req, res, next) => {
+//     const { user } = req;
+//     const { files } = req;
+
+//     const updatedUser = await findAndUpdate({
+//       model: UserModel,
+//       filters: { _id: user._id },
+//       data: { profileGallery: files.map((file) => file.finalPath) },
+//       select: "-password -confirmEmailOtpAttempts -oldPasswords",
+//     });
+//     if (!updatedUser) {
+//       return next(new Error("Failed to update profile gallery", { cause: 400 }));
+//     }
+//     return successResponse({
+//       res,
+//       statusCode: 200,
+//       message: "Profile gallery uploaded successfully",
+//       data: { files },
+//     });
+//   },
+// );

@@ -72,6 +72,7 @@ const userSchema = new Mongoose.Schema(
     confirmEmailOtpAttempts: { type: Number, default: 0 },
     confirmEmailOtpBlockedUntil: Date,
     picture: String,
+    profileGallery: [String],
     providers: {
       type: String,
       enum: {

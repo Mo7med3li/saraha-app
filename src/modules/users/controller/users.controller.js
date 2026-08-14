@@ -14,12 +14,14 @@ import {
   logout,
   refreshToken,
   profileImageUpload,
+  profileGalleryUpload,
 } from "../services/users.service.js";
 import { authorize } from "../../../authorize/authorize.js";
 import {
   deleteAccountSchema,
   freezeAccountSchema,
   logoutSchema,
+  profileGallerySchema,
   refreshTokenSchema,
   restoreAccountSchema,
   updatePasswordSchema,
@@ -99,7 +101,6 @@ usersRouter.delete(
 usersRouter.patch(
   "/profile-image",
   authMiddleware(),
-
   localFileUpload({
     customPath: "users",
     filterValidation: FILE_FILTER_VALIDATION.image,
@@ -107,4 +108,30 @@ usersRouter.patch(
   profileImageUpload,
 );
 
+usersRouter.patch(
+  "/profile-gallery",
+  authMiddleware(),
+  localFileUpload({
+    customPath: "users",
+    filterValidation: FILE_FILTER_VALIDATION.image,
+  }).array("profileGallery", 10), // 10 images max
+  validationMiddleware(profileGallerySchema),
+  profileGalleryUpload,
+);
+
+// usersRouter.patch(
+//   "/profile-gallery-and-certifications",
+//   authMiddleware(),
+//   localFileUpload({
+//     customPath: "users",
+//     filterValidation: [
+//       ...FILE_FILTER_VALIDATION.image,
+//       FILE_FILTER_VALIDATION.document[0],
+//     ],
+//   }).fields([
+//     { name: "profileGallery", maxCount: 10 },
+//     { name: "certifications", maxCount: 2 },
+//   ]), // 10 images max
+//   profileGalleryAndCertificationsUpload,
+// );
 export default usersRouter;
