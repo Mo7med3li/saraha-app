@@ -66,28 +66,6 @@ export const refreshTokenSchema = {
 };
 
 export const profileGallerySchema = {
-  // files: Joi.array()
-  //   .items(
-  //     Joi.object()
-  //       .keys({
-  //         fieldname: Joi.string().valid("profileGallery").required(),
-  //         originalname: Joi.string().required(),
-  //         encoding: Joi.string().required(),
-  //         destination: Joi.string().required(),
-  //         mimetype: Joi.string()
-  //           .valid(...FILE_FILTER_VALIDATION.image)
-  //           .required(),
-  //         finalPath: Joi.string().required(),
-  //         filename: Joi.string().required(),
-  //         path: Joi.string().required(),
-  //         size: Joi.number().positive().required(),
-  //       })
-  //       .required(),
-  //   )
-  //   .min(1)
-  //   .max(10)
-  //   .required(),
-
   files: Joi.array()
     .items(
       Joi.object()
