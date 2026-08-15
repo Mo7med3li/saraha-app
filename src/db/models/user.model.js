@@ -71,8 +71,16 @@ const userSchema = new Mongoose.Schema(
     forgotPasswordOtpBlockedUntil: Date,
     confirmEmailOtpAttempts: { type: Number, default: 0 },
     confirmEmailOtpBlockedUntil: Date,
-    picture: String,
-    profileGallery: [String],
+    profileImage: {
+      imageUrl: String,
+      asset_id: String,
+    },
+    profileGallery: [
+      {
+        imageUrl: String,
+        asset_id: String,
+      },
+    ],
     providers: {
       type: String,
       enum: {

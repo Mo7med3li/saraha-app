@@ -22,6 +22,7 @@ import {
   freezeAccountSchema,
   logoutSchema,
   profileGallerySchema,
+  profileImageSchema,
   refreshTokenSchema,
   restoreAccountSchema,
   updatePasswordSchema,
@@ -34,6 +35,7 @@ import {
   TOKEN_TYPES_ENUM,
 } from "../../../lib/constants/constants.js";
 import { localFileUpload } from "../../../lib/utils/multer/local.multer.js";
+import { cloudinaryFileUpload } from "../../../lib/utils/multer/cloud.multer.js";
 
 const usersRouter = Router();
 
@@ -101,10 +103,10 @@ usersRouter.delete(
 usersRouter.patch(
   "/profile-image",
   authMiddleware(),
-  localFileUpload({
-    customPath: "users",
+  cloudinaryFileUpload({
     filterValidation: FILE_FILTER_VALIDATION.image,
   }).single("profileImage"),
+  validationMiddleware(profileImageSchema),
   profileImageUpload,
 );
 

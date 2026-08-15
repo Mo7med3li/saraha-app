@@ -6,6 +6,11 @@ import {
 } from "../../../db/db.service.js";
 import UserModel from "../../../db/models/user.model.js";
 import { LOGOUT_ENUM, ROLES_ENUM } from "../../../lib/constants/constants.js";
+import {
+  cloud,
+  cloudFileDelete,
+  cloudFileUpload,
+} from "../../../lib/utils/multer/cloudinary.js";
 import { asyncHandler, successResponse } from "../../../lib/utils/response.js";
 import {
   decryption,
@@ -297,21 +302,36 @@ export const logout = asyncHandler(async (req, res, next) => {
 export const profileImageUpload = asyncHandler(async (req, res, next) => {
   const { user } = req;
   const { file } = req;
-  // const { path } = file;
+
+  const { secure_url, public_id } = await cloudFileUpload({
+    file,
+    folder: `users/${user._id}`,
+  });
   const updatedUser = await findAndUpdate({
     model: UserModel,
     filters: { _id: user._id },
-    data: { picture: file.finalPath },
+    data: { profileImage: { imageUrl: secure_url, asset_id: public_id } },
     select: "-password -confirmEmailOtpAttempts -oldPasswords",
+    options: { new: false },
   });
   if (!updatedUser) {
     return next(new Error("Failed to update profile image", { cause: 400 }));
   }
+  if (updatedUser.profileImage.asset_id) {
+    const deleted = await cloudFileDelete({
+      asset_id: updatedUser.profileImage.asset_id,
+    });
+    if (!deleted) {
+      return next(
+        new Error("Failed to delete previous profile image", { cause: 400 }),
+      );
+    }
+  }
+
   return successResponse({
     res,
     statusCode: 200,
     message: "Profile image uploaded successfully",
-    data: { user: updatedUser },
   });
 });
 

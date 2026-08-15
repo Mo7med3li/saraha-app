@@ -65,6 +65,20 @@ export const refreshTokenSchema = {
     .unknown(true),
 };
 
+export const profileImageSchema = {
+  file: Joi.object().keys({
+    fieldname: generalFieldsSchema.file.fieldname.valid("profileImage"),
+    originalname: generalFieldsSchema.file.originalname,
+    encoding: generalFieldsSchema.file.encoding,
+    destination: generalFieldsSchema.file.destination,
+    mimetype: generalFieldsSchema.file.mimetype.valid(
+      ...FILE_FILTER_VALIDATION.image,
+    ),
+    filename: generalFieldsSchema.file.filename,
+    path: generalFieldsSchema.file.path,
+    size: generalFieldsSchema.file.size,
+  }),
+};
 export const profileGallerySchema = {
   files: Joi.array()
     .items(
@@ -77,7 +91,6 @@ export const profileGallerySchema = {
           mimetype: generalFieldsSchema.file.mimetype.valid(
             ...FILE_FILTER_VALIDATION.image,
           ),
-          finalPath: generalFieldsSchema.file.finalPath,
           filename: generalFieldsSchema.file.filename,
           path: generalFieldsSchema.file.path,
           size: generalFieldsSchema.file.size,
