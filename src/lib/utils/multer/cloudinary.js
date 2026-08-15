@@ -10,6 +10,7 @@ export const cloud = () => {
   return cloudinary;
 };
 
+// upload single file
 export const cloudFileUpload = async ({
   file = {},
   folder = "general",
@@ -20,6 +21,32 @@ export const cloudFileUpload = async ({
   return cloudUpload;
 };
 
+// upload multiple files
+export const cloudfilesupload = async ({
+  files = [],
+  folder = "general",
+} = {}) => {
+  const uploadedFiles = [];
+  await Promise.all(
+    files.map(async (file) => {
+      const { secure_url, public_id } = await cloudFileUpload({ file, folder });
+      uploadedFiles.push({ imageUrl: secure_url, asset_id: public_id });
+    }),
+  );
+  return uploadedFiles;
+};
+
+// delete single file
 export const cloudFileDelete = async ({ asset_id = "" } = {}) => {
   return await cloud().uploader.destroy(asset_id);
+};
+
+export const cloudResourceDelete = async ({
+  asset_ids = [],
+  options = {
+    type: "upload",
+    resource_type: "image",
+  },
+} = {}) => {
+  return await cloud().api.delete_resources(asset_ids, options);
 };

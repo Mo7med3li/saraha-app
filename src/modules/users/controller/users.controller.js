@@ -113,10 +113,9 @@ usersRouter.patch(
 usersRouter.patch(
   "/profile-gallery",
   authMiddleware(),
-  localFileUpload({
-    customPath: "users",
+  cloudinaryFileUpload({
     filterValidation: FILE_FILTER_VALIDATION.image,
-  }).array("profileGallery", 10), // 10 images max
+  }).array("profileGallery", 5), // 5 images max
   validationMiddleware(profileGallerySchema),
   profileGalleryUpload,
 );

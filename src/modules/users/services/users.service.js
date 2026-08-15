@@ -9,7 +9,9 @@ import { LOGOUT_ENUM, ROLES_ENUM } from "../../../lib/constants/constants.js";
 import {
   cloud,
   cloudFileDelete,
+  cloudfilesupload,
   cloudFileUpload,
+  cloudResourceDelete,
 } from "../../../lib/utils/multer/cloudinary.js";
 import { asyncHandler, successResponse } from "../../../lib/utils/response.js";
 import {
@@ -305,8 +307,11 @@ export const profileImageUpload = asyncHandler(async (req, res, next) => {
 
   const { secure_url, public_id } = await cloudFileUpload({
     file,
-    folder: `users/${user._id}`,
+    folder: `users/${user._id}/profile-image`,
   });
+  if (!secure_url || !public_id) {
+    return next(new Error("Failed to upload profile image", { cause: 400 }));
+  }
   const updatedUser = await findAndUpdate({
     model: UserModel,
     filters: { _id: user._id },
@@ -339,20 +344,43 @@ export const profileGalleryUpload = asyncHandler(async (req, res, next) => {
   const { user } = req;
   const { files } = req;
 
+  const uploadedFiles = await cloudfilesupload({
+    files,
+    folder: `users/${user._id}/profile-gallery-images`,
+  });
+  if (uploadedFiles.length === 0) {
+    return next(
+      new Error("Failed to upload profile gallery images", { cause: 400 }),
+    );
+  }
+  console.log("uploadedFiles", uploadedFiles);
+
   const updatedUser = await findAndUpdate({
     model: UserModel,
     filters: { _id: user._id },
-    data: { profileGallery: files.map((file) => file.finalPath) },
+    data: { profileGallery: uploadedFiles },
     select: "-password -confirmEmailOtpAttempts -oldPasswords",
+    options: { new: false },
   });
   if (!updatedUser) {
     return next(new Error("Failed to update profile gallery", { cause: 400 }));
+  }
+  if (updatedUser.profileGallery.length > 0) {
+    const deleted = await cloudResourceDelete({
+      asset_ids: updatedUser.profileGallery.map((file) => file.asset_id),
+    });
+    if (!deleted) {
+      return next(
+        new Error("Failed to delete previous profile gallery images", {
+          cause: 400,
+        }),
+      );
+    }
   }
   return successResponse({
     res,
     statusCode: 200,
     message: "Profile gallery uploaded successfully",
-    data: { user: updatedUser },
   });
 });
 
