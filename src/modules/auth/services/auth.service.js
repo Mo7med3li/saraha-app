@@ -184,7 +184,7 @@ export const googleLoginOrSignup = asyncHandler(async (req, res, next) => {
         email,
         userName: name,
         confirmEmail: new Date(),
-        picture,
+        profileImage: { imageUrl: picture, asset_id: picture },
         providers: PROVIDERS_ENUM.GOOGLE,
       },
     ],

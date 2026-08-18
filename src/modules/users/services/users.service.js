@@ -8,6 +8,7 @@ import UserModel from "../../../db/models/user.model.js";
 import { LOGOUT_ENUM, ROLES_ENUM } from "../../../lib/constants/constants.js";
 import {
   cloud,
+  cloudDeleteFolderByPrefix,
   cloudFileDelete,
   cloudfilesupload,
   cloudFileUpload,
@@ -218,6 +219,8 @@ export const deleteAccount = asyncHandler(async (req, res, next) => {
       }),
     );
   }
+
+  await cloudDeleteFolderByPrefix({ prefix: `users/${id}` });
 
   return successResponse({
     res,

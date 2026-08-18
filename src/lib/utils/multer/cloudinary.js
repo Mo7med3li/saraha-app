@@ -50,3 +50,9 @@ export const cloudResourceDelete = async ({
 } = {}) => {
   return await cloud().api.delete_resources(asset_ids, options);
 };
+
+export const cloudDeleteFolderByPrefix = async ({ prefix = "" } = {}) => {
+  return await cloud().api.delete_resources_by_prefix(
+    `${process.env.APPLICATION_NAME}/${prefix}`,
+  );
+};
