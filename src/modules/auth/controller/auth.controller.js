@@ -22,7 +22,10 @@ import {
 } from "../schema/auth.schema.js";
 import { validationMiddleware } from "../../../middleware/validation.middleware.js";
 
-const authRouter = Router();
+const authRouter = Router({
+  caseSensitive: true,
+  strict: true,
+});
 authRouter.post("/signup", validationMiddleware(signupSchema), signup);
 authRouter.patch(
   "/confirm-email",

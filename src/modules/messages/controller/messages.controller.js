@@ -6,7 +6,10 @@ import { validationMiddleware } from "../../../middleware/validation.middleware.
 import { createMessageSchema } from "../schema/message.schema.js";
 import { authMiddleware } from "../../../middleware/authentication.middleware.js";
 
-const messagesRouter = Router();
+const messagesRouter = Router({
+  caseSensitive: true,
+  strict: true,
+});
 
 messagesRouter.post(
   "/:receiverId",

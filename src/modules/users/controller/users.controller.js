@@ -37,7 +37,10 @@ import {
 import { localFileUpload } from "../../../lib/utils/multer/local.multer.js";
 import { cloudinaryFileUpload } from "../../../lib/utils/multer/cloud.multer.js";
 
-const usersRouter = Router();
+const usersRouter = Router({
+  caseSensitive: true,
+  strict: true,
+});
 
 usersRouter.get(
   "/profile",
