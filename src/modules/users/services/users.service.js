@@ -1,6 +1,7 @@
 import {
   deleteOne,
   findAndUpdate,
+  findById,
   findOne,
   updateOne,
 } from "../../../db/db.service.js";
@@ -31,15 +32,26 @@ import {
 // Get user by ID service
 export const getUserById = asyncHandler(async (req, res, next) => {
   const { user } = req;
-  user.phoneNumber = decryption({
-    cipherText: user.phoneNumber,
+  const userWithMessages = await findById({
+    model: UserModel,
+    id: user._id,
+    populate: {
+      path: "messages",
+    },
+    select: "-password -confirmEmailOtpAttempts -oldPasswords",
+  });
+  if (!userWithMessages) {
+    return next(new Error("User not found", { cause: 404 }));
+  }
+  userWithMessages.phoneNumber = decryption({
+    cipherText: userWithMessages.phoneNumber,
   });
 
   return successResponse({
     res,
     statusCode: 200,
     message: "User fetched successfully",
-    data: { user },
+    data: { user: userWithMessages },
   });
 });
 

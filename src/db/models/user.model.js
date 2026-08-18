@@ -128,6 +128,12 @@ userSchema
   .get(function () {
     return `${this.firstName} ${this.lastName}`;
   });
+
+userSchema.virtual("messages", {
+  ref: "Message",
+  localField: "_id",
+  foreignField: "senderId",
+});
 userSchema.index(
   { firstName: 1, lastName: 1 },
   { unique: true, name: "fullName_index" },
