@@ -7,11 +7,14 @@ import messagesRouter from "./modules/messages/controller/messages.controller.js
 import userRouter from "./modules/users/controller/users.controller.js";
 import path from "path";
 import morgan from "morgan";
+import helmet from "helmet";
 export const bootstrap = async () => {
   const app = express();
   const port = process.env.PORT || 5000;
   app.use(express.json());
 
+  // to secure the headers
+  app.use(helmet());
   // to detect the request and response time
   app.use(morgan("dev"));
   // CORS
