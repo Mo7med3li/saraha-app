@@ -368,7 +368,6 @@ export const profileGalleryUpload = asyncHandler(async (req, res, next) => {
       new Error("Failed to upload profile gallery images", { cause: 400 }),
     );
   }
-  console.log("uploadedFiles", uploadedFiles);
 
   const updatedUser = await findAndUpdate({
     model: UserModel,
