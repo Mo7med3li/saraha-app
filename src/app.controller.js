@@ -8,6 +8,7 @@ import userRouter from "./modules/users/controller/users.controller.js";
 import path from "path";
 import morgan from "morgan";
 import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 export const bootstrap = async () => {
   const app = express();
   const port = process.env.PORT || 5000;
@@ -15,6 +16,16 @@ export const bootstrap = async () => {
 
   // to secure the headers
   app.use(helmet());
+
+  const limiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    limit: 2000, // limit each IP to 2000 requests per windowMs
+    message: "Too many requests, please try again later.",
+    // legacyHeaders: false,
+  });
+
+  app.use(limiter);
+
   // to detect the request and response time
   app.use(morgan("dev"));
   // CORS
