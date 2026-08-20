@@ -38,6 +38,20 @@ const messageSchema = new Mongoose.Schema(
   },
 );
 
+messageSchema.virtual("sender", {
+  ref: "User",
+  localField: "senderId",
+  foreignField: "_id",
+  justOne: true,
+  select: "-password -confirmEmailOtpAttempts -oldPasswords",
+});
+messageSchema.virtual("receiver", {
+  ref: "User",
+  localField: "receiverId",
+  foreignField: "_id",
+  select: "-password -confirmEmailOtpAttempts -oldPasswords",
+  justOne: true,
+});
 const MessageModel =
   Mongoose.models.Message || Mongoose.model("Message", messageSchema);
 
