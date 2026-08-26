@@ -2,18 +2,19 @@
   "name": "saraha-app",
   "version": "1.0.0",
   "description": "",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "engines": {
     "node": "24.16.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon src/index.js"
+    "dev": "nodemon src/index.js",
+    "start:dev": "concurrently \"tsc --watch\" \"node --watch dist/index.js\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module",
+  "type": "commonjs",
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.10.0",
@@ -31,5 +32,15 @@
     "multer": "^2.2.0",
     "nanoid": "^6.0.1",
     "nodemailer": "^9.0.4"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/crypto-js": "^4.2.2",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10",
+    "@types/multer": "^2.2.0",
+    "@types/node": "^26.3.0",
+    "concurrently": "^10.0.5"
   }
 }
