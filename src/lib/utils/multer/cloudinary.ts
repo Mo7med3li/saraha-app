@@ -2,9 +2,9 @@ import { v2 as cloudinary } from "cloudinary";
 
 export const cloud = () => {
   cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME as string,
+    api_key: process.env.CLOUDINARY_API_KEY as string,
+    api_secret: process.env.CLOUDINARY_API_SECRET as string,
     secure: true,
   });
   return cloudinary;
@@ -12,10 +12,13 @@ export const cloud = () => {
 
 // upload single file
 export const cloudFileUpload = async ({
-  file = {},
+  file,
   folder = "general",
-} = {}) => {
-  const cloudUpload = await cloud().uploader.upload(file.path, {
+}: {
+  file: { path: string };
+  folder: string;
+}) => {
+  const cloudUpload = await cloud().uploader.upload(file.path as string, {
     folder: `${process.env.APPLICATION_NAME}/${folder}`,
   });
   return cloudUpload;
@@ -26,7 +29,7 @@ export const cloudfilesupload = async ({
   files = [],
   folder = "general",
 } = {}) => {
-  const uploadedFiles = [];
+  const uploadedFiles: { imageUrl: string; asset_id: string }[] = [];
   await Promise.all(
     files.map(async (file) => {
       const { secure_url, public_id } = await cloudFileUpload({ file, folder });
