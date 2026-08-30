@@ -1,11 +1,11 @@
 import cryptoJs from "crypto-js";
 interface EncryptionProps {
   plainText: string;
-  key: string | undefined;
+  key?: string;
 }
 interface DecryptionProps {
   cipherText: string;
-  key: string | undefined;
+  key?: string;
 }
 export const encryption = ({
   plainText,

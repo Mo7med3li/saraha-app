@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 
 interface HashProps {
   plainText: string;
-  saltRounds: number | undefined;
+  saltRounds?: number;
 }
 interface CompareHashProps {
   plainText: string;

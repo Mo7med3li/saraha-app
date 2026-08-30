@@ -10,24 +10,25 @@ export const cloud = () => {
   return cloudinary;
 };
 
-// upload single file
 export const cloudFileUpload = async ({
   file,
   folder = "general",
 }: {
-  file: { path: string };
-  folder: string;
+  file: Pick<Express.Multer.File, "path">;
+  folder?: string;
 }) => {
-  const cloudUpload = await cloud().uploader.upload(file.path as string, {
+  const cloudUpload = await cloud().uploader.upload(file.path, {
     folder: `${process.env.APPLICATION_NAME}/${folder}`,
   });
   return cloudUpload;
 };
 
-// upload multiple files
 export const cloudfilesupload = async ({
   files = [],
   folder = "general",
+}: {
+  files?: Express.Multer.File[];
+  folder?: string;
 } = {}) => {
   const uploadedFiles: { imageUrl: string; asset_id: string }[] = [];
   await Promise.all(
@@ -39,7 +40,6 @@ export const cloudfilesupload = async ({
   return uploadedFiles;
 };
 
-// delete single file
 export const cloudFileDelete = async ({ asset_id = "" } = {}) => {
   return await cloud().uploader.destroy(asset_id);
 };
@@ -50,6 +50,9 @@ export const cloudResourceDelete = async ({
     type: "upload",
     resource_type: "image",
   },
+}: {
+  asset_ids?: string[];
+  options?: { type: string; resource_type: string };
 } = {}) => {
   return await cloud().api.delete_resources(asset_ids, options);
 };

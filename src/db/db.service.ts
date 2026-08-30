@@ -9,7 +9,7 @@ export const findOne = async ({
   model: Model<any>;
   filters?: Record<string, any>;
   select?: string;
-  populate?: Record<string, any>[];
+  populate?: PopulateOptions | PopulateOptions[] | Record<string, unknown>;
 }) => {
   return await model
     .findOne(filters)
@@ -26,7 +26,7 @@ export const findById = async ({
   model: Model<any>;
   id: string;
   select?: string;
-  populate?: Record<string, any>[];
+  populate?: PopulateOptions | PopulateOptions[] | Record<string, unknown>;
 }) => {
   return await model
     .findById(id)
@@ -43,7 +43,7 @@ export const findAll = async ({
   model: Model<any>;
   filters?: Record<string, any>;
   select?: string;
-  populate?: Record<string, any>[];
+  populate?: PopulateOptions | PopulateOptions[] | Record<string, unknown>;
 }) => {
   return await model
     .find(filters)
@@ -88,7 +88,7 @@ export const findAndUpdate = async ({
   filters?: Record<string, any>;
   data?: Record<string, any>;
   select?: string;
-  populate?: Record<string, any>[];
+  populate?: PopulateOptions | PopulateOptions[] | Record<string, unknown>;
   options?: Record<string, any>;
 }) => {
   const { $inc: dataInc, ...rest } = data;
