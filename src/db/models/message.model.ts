@@ -1,19 +1,13 @@
 import Mongoose from "mongoose";
-import {
-  Gender_Enum,
-  PROVIDERS_ENUM,
-  ROLES_ENUM,
-} from "../../lib/constants/constants.js";
 
 const messageSchema = new Mongoose.Schema(
   {
     content: {
       type: String,
-      required: true,
       minLength: [3, "Content must be at least 3 characters long"],
       maxLength: [20000, "Content must be less than 20000 characters long"],
-      required: function () {
-        return this.attachments.length === 0;
+      required: function (this: { attachments?: { length: number }[] }) {
+        return !this.attachments?.length;
       },
     },
     attachments: [
@@ -31,10 +25,17 @@ const messageSchema = new Mongoose.Schema(
       ref: "User",
       required: true,
     },
+    parentMessageId: {
+      type: Mongoose.Schema.Types.ObjectId,
+      ref: "Message",
+      default: null,
+    },
   },
 
   {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   },
 );
 
@@ -52,6 +53,23 @@ messageSchema.virtual("receiver", {
   select: "-password -confirmEmailOtpAttempts -oldPasswords",
   justOne: true,
 });
+
+messageSchema.virtual("parentMessage", {
+  ref: "Message",
+  localField: "parentMessageId",
+  foreignField: "_id",
+  justOne: true,
+});
+
+messageSchema.virtual("replies", {
+  ref: "Message",
+  localField: "_id",
+  foreignField: "parentMessageId",
+});
+
+messageSchema.index({ parentMessageId: 1 });
+messageSchema.index({ receiverId: 1, createdAt: -1 });
+
 const MessageModel =
   Mongoose.models.Message || Mongoose.model("Message", messageSchema);
 

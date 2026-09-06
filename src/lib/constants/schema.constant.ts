@@ -1,4 +1,4 @@
-import Joi from "joi";
+import Joi, { LanguageMessages } from "joi";
 import { Gender_Enum, LOGOUT_ENUM } from "./constants.js";
 import { Types } from "mongoose";
 
@@ -63,7 +63,8 @@ export const generalFieldsSchema = {
   }),
   id: Joi.string().custom((value, helpers) => {
     return (
-      Types.ObjectId.isValid(value) || helpers.message("invalid id format")
+      Types.ObjectId.isValid(value) ||
+      helpers.message("invalid id format" as unknown as LanguageMessages)
     );
   }),
   flag: Joi.string()

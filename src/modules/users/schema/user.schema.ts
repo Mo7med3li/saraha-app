@@ -1,6 +1,6 @@
 import Joi from "joi";
-import { generalFieldsSchema } from "../../../lib/constants/schema.constant.js";
-import { FILE_FILTER_VALIDATION } from "../../../lib/constants/constants.js";
+import { generalFieldsSchema } from "../../../lib/constants/schema.constant";
+import { FILE_FILTER_VALIDATION } from "../../../lib/constants/constants";
 
 export const userSharedDataSchema = {
   params: Joi.object().keys({

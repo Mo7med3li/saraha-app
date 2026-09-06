@@ -9,7 +9,7 @@ import {
   sendForgotPasswordOtp,
   verifyForgotPasswordOtp,
   resetPassword,
-} from "../services/auth.service.js";
+} from "../services/auth.service";
 import {
   confirmEmailSchema,
   googleAuthSchema,
@@ -19,7 +19,7 @@ import {
   sendForgotPasswordOtpSchema,
   signupSchema,
   verifyForgotPasswordOtpSchema,
-} from "../schema/auth.schema.js";
+} from "../schema/auth.schema";
 import { validationMiddleware } from "../../../middleware/validation.middleware.js";
 
 const authRouter = Router({

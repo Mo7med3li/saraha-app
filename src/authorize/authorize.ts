@@ -1,4 +1,4 @@
-import { ROLES_ENUM } from "../lib/constants/constants.js";
+import { ROLES_ENUM } from "../lib/constants/constants";
 
 export const authorize = {
   profile: [ROLES_ENUM.USER, ROLES_ENUM.ADMIN],

@@ -19,7 +19,7 @@ export const sendEmail = async ({
     },
   });
 
-  const info = await transporter.sendMail({
+  await transporter.sendMail({
     from: `"Saraha App " <${from}>`, // sender address
     to, // list of recipients
     subject, // subject line

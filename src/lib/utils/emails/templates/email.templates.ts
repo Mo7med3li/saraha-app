@@ -1,12 +1,18 @@
 /**
  * @param {{ otp: string|number, userName?: string }} params
  */
+interface ConfirmEmailTemplateProps {
+  otp: string | number;
+  userName?: string;
+  title: string;
+  purpose: string;
+}
 export const confirmEmailTemplate = ({
   otp,
   userName,
   title,
   purpose,
-} = {}) => {
+}: ConfirmEmailTemplateProps) => {
   const greeting = userName ? `Hi ${userName},` : "Hi there,";
   const year = new Date().getFullYear();
 

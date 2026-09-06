@@ -110,13 +110,16 @@ export const login = asyncHandler(async (req, res, next) => {
 });
 
 // verify google token
-async function verifyGoogleToken({ idToken }) {
+async function verifyGoogleToken({ idToken }: { idToken: string }) {
   const client = new OAuth2Client();
   const ticket = await client.verifyIdToken({
     idToken,
-    audience: process.env.GOOGLE_OAUTH_CLIENT_ID.split(","),
+    audience: process.env.GOOGLE_OAUTH_CLIENT_ID!.split(","),
   });
   const payload = ticket.getPayload();
+  if (!payload) {
+    throw new Error("invalid google token", { cause: 400 });
+  }
 
   return payload;
 }
@@ -277,7 +280,7 @@ export const resendConfirmEmail = asyncHandler(async (req, res, next) => {
     user.confirmEmailOtpBlockedUntil > now
   ) {
     const retryAfterSeconds = Math.ceil(
-      (user.confirmEmailOtpBlockedUntil - now) / 1000,
+      (user.confirmEmailOtpBlockedUntil.getTime() - now.getTime()) / 1000,
     );
     return next(
       new Error(
@@ -290,7 +293,7 @@ export const resendConfirmEmail = asyncHandler(async (req, res, next) => {
   if (user.confirmEmailOtpExpiresAt && user.confirmEmailOtpExpiresAt > now) {
     return next(
       new Error(
-        `otp not expired, please wait for ${Math.ceil((user.confirmEmailOtpExpiresAt - now) / 1000)} seconds`,
+        `otp not expired, please wait for ${Math.ceil((user.confirmEmailOtpExpiresAt.getTime() - now.getTime()) / 1000)} seconds`,
         { cause: 400 },
       ),
     );
@@ -306,7 +309,7 @@ export const resendConfirmEmail = asyncHandler(async (req, res, next) => {
   const otp = customAlphabet("0123456789", 6)();
   const confirmEmailOtp = await generateHash({ plainText: otp });
 
-  const data = {
+  const data: Record<string, unknown> = {
     confirmEmailOtp,
     confirmEmailOtpExpiresAt: new Date(now.getTime() + OTP_TTL_MS),
     confirmEmailOtpAttempts: nextAttempts,
@@ -363,7 +366,7 @@ export const sendForgotPasswordOtp = asyncHandler(async (req, res, next) => {
     user.forgotPasswordOtpBlockedUntil > now
   ) {
     const retryAfterSeconds = Math.ceil(
-      (user.forgotPasswordOtpBlockedUntil - now) / 1000,
+      (user.forgotPasswordOtpBlockedUntil.getTime() - now.getTime()) / 1000,
     );
     return next(
       new Error(
@@ -379,7 +382,7 @@ export const sendForgotPasswordOtp = asyncHandler(async (req, res, next) => {
   ) {
     return next(
       new Error(
-        `otp not expired, please wait for ${Math.ceil((user.forgotPasswordOtpExpiresAt - now) / 1000)} seconds`,
+        `otp not expired, please wait for ${Math.ceil((user.forgotPasswordOtpExpiresAt.getTime() - now.getTime()) / 1000)} seconds`,
         { cause: 400 },
       ),
     );
@@ -396,7 +399,7 @@ export const sendForgotPasswordOtp = asyncHandler(async (req, res, next) => {
   const otp = customAlphabet("0123456789", 6)();
   const forgotPasswordOtp = generateHash({ plainText: otp });
 
-  const data = {
+  const data: Record<string, unknown> = {
     forgotPasswordOtp,
     forgotPasswordOtpExpiresAt: new Date(now.getTime() + OTP_TTL_MS),
     forgotPasswordOtpAttempts: nextAttempts,

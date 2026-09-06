@@ -2,31 +2,35 @@ import { v2 as cloudinary } from "cloudinary";
 
 export const cloud = () => {
   cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME as string,
+    api_key: process.env.CLOUDINARY_API_KEY as string,
+    api_secret: process.env.CLOUDINARY_API_SECRET as string,
     secure: true,
   });
   return cloudinary;
 };
 
-// upload single file
 export const cloudFileUpload = async ({
-  file = {},
+  file,
   folder = "general",
-} = {}) => {
+}: {
+  file: Pick<Express.Multer.File, "path">;
+  folder?: string;
+}) => {
   const cloudUpload = await cloud().uploader.upload(file.path, {
     folder: `${process.env.APPLICATION_NAME}/${folder}`,
   });
   return cloudUpload;
 };
 
-// upload multiple files
 export const cloudfilesupload = async ({
   files = [],
   folder = "general",
+}: {
+  files?: Express.Multer.File[];
+  folder?: string;
 } = {}) => {
-  const uploadedFiles = [];
+  const uploadedFiles: { imageUrl: string; asset_id: string }[] = [];
   await Promise.all(
     files.map(async (file) => {
       const { secure_url, public_id } = await cloudFileUpload({ file, folder });
@@ -36,7 +40,6 @@ export const cloudfilesupload = async ({
   return uploadedFiles;
 };
 
-// delete single file
 export const cloudFileDelete = async ({ asset_id = "" } = {}) => {
   return await cloud().uploader.destroy(asset_id);
 };
@@ -47,6 +50,9 @@ export const cloudResourceDelete = async ({
     type: "upload",
     resource_type: "image",
   },
+}: {
+  asset_ids?: string[];
+  options?: { type: string; resource_type: string };
 } = {}) => {
   return await cloud().api.delete_resources(asset_ids, options);
 };

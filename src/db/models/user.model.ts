@@ -30,7 +30,7 @@ const userSchema = new Mongoose.Schema(
     },
     password: {
       type: String,
-      required: function () {
+      required: function (this: { providers?: string }) {
         return this.providers === PROVIDERS_ENUM.SYSTEM;
       },
       minLength: [8, "Password must be at least 8 characters long"],
@@ -57,7 +57,7 @@ const userSchema = new Mongoose.Schema(
     },
     phoneNumber: {
       type: String,
-      required: function () {
+      required: function (this: { providers?: string }) {
         return this.providers === PROVIDERS_ENUM.SYSTEM;
       },
     },
@@ -143,3 +143,18 @@ const UserModel = Mongoose.models.User || Mongoose.model("User", userSchema);
 UserModel.syncIndexes();
 
 export default UserModel;
+
+export interface IUser extends Mongoose.Document {
+  _id: Mongoose.Types.ObjectId;
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  oldPasswords: string[];
+  gender: keyof typeof Gender_Enum;
+  role: keyof typeof ROLES_ENUM;
+  phoneNumber: string;
+  changeCredentialsTime?: Date;
+  profileImage?: { imageUrl: string; asset_id: string };
+  profileGallery?: { imageUrl: string; asset_id: string }[];
+}

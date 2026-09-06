@@ -2,7 +2,7 @@ import { Router } from "express";
 import {
   authMiddleware,
   authorizeMiddleware,
-} from "../../../middleware/authentication.middleware.js";
+} from "../../../middleware/authentication.middleware";
 import {
   getUserById,
   getUserSharedData,
@@ -15,8 +15,8 @@ import {
   refreshToken,
   profileImageUpload,
   profileGalleryUpload,
-} from "../services/users.service.js";
-import { authorize } from "../../../authorize/authorize.js";
+} from "../services/users.service";
+import { authorize } from "../../../authorize/authorize";
 import {
   deleteAccountSchema,
   freezeAccountSchema,
@@ -28,16 +28,15 @@ import {
   updatePasswordSchema,
   userSharedDataSchema,
   userUpdateInfoSchema,
-} from "../schema/user.schema.js";
-import { validationMiddleware } from "../../../middleware/validation.middleware.js";
+} from "../schema/user.schema";
+import { validationMiddleware } from "../../../middleware/validation.middleware";
 import {
   FILE_FILTER_VALIDATION,
   TOKEN_TYPES_ENUM,
-} from "../../../lib/constants/constants.js";
-import { localFileUpload } from "../../../lib/utils/multer/local.multer.js";
-import { cloudinaryFileUpload } from "../../../lib/utils/multer/cloud.multer.js";
+} from "../../../lib/constants/constants";
+import { cloudinaryFileUpload } from "../../../lib/utils/multer/cloud.multer";
 
-const usersRouter = Router({
+const usersRouter: Router = Router({
   caseSensitive: true,
   strict: true,
 });
@@ -45,7 +44,7 @@ const usersRouter = Router({
 usersRouter.get(
   "/profile",
   authMiddleware(),
-  authorizeMiddleware({ roles: authorize.profile }),
+  authorizeMiddleware({ roles: authorize.profile as string[] }),
   getUserById,
 );
 
