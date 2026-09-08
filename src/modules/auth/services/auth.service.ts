@@ -9,7 +9,10 @@ import {
 } from "../../../lib/utils/security/hash.security.js";
 import { generateTokens } from "../../../lib/utils/security/token.security.js";
 import { PROVIDERS_ENUM } from "../../../lib/constants/constants.js";
-import emailEvent from "../../../lib/utils/events/email.event.js";
+import {
+  sendConfirmEmail,
+  sendForgotPasswordEmail,
+} from "../../../lib/utils/emails/otp.email.js";
 import { customAlphabet } from "nanoid";
 
 const OTP_MAX_ATTEMPTS = 5;
@@ -54,12 +57,21 @@ export const signup = asyncHandler(async (req, res, next) => {
   });
   user.password = undefined;
   user.phoneNumber = undefined;
-  emailEvent.emit("send-email", {
-    to: email,
-    subject: "Confirmation Email",
-    otp,
-    userName: firstName,
-  });
+  try {
+    await sendConfirmEmail({
+      to: email,
+      subject: "Confirmation Email",
+      otp,
+      userName: firstName,
+    });
+  } catch {
+    return next(
+      new Error(
+        "User created but failed to send confirmation email. Please resend OTP.",
+        { cause: 502 },
+      ),
+    );
+  }
   return successResponse({
     res,
     statusCode: 201,
@@ -330,12 +342,20 @@ export const resendConfirmEmail = asyncHandler(async (req, res, next) => {
     return next(new Error("failed to resend confirm email", { cause: 400 }));
   }
 
-  emailEvent.emit("send-email", {
-    to: email,
-    subject: "Confirmation Email",
-    otp,
-    userName: user.userName,
-  });
+  try {
+    await sendConfirmEmail({
+      to: email,
+      subject: "Confirmation Email",
+      otp,
+      userName: user.userName,
+    });
+  } catch {
+    return next(
+      new Error("Failed to send confirmation email. Please try again.", {
+        cause: 502,
+      }),
+    );
+  }
 
   return successResponse({
     res,
@@ -422,12 +442,20 @@ export const sendForgotPasswordOtp = asyncHandler(async (req, res, next) => {
     );
   }
 
-  emailEvent.emit("send-email-forgot-password", {
-    to: email,
-    subject: "Forgot Password",
-    otp,
-    userName: user.userName,
-  });
+  try {
+    await sendForgotPasswordEmail({
+      to: email,
+      subject: "Forgot Password",
+      otp,
+      userName: user.userName,
+    });
+  } catch {
+    return next(
+      new Error("Failed to send forgot password email. Please try again.", {
+        cause: 502,
+      }),
+    );
+  }
 
   return successResponse({
     res,

@@ -33,7 +33,8 @@
     "morgan": "^1.11.0",
     "multer": "^2.2.0",
     "nanoid": "^6.0.1",
-    "nodemailer": "^9.0.4"
+    "nodemailer": "^9.0.4",
+    "resend": "^6.26.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

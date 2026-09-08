@@ -1,39 +1,51 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
+
+type SendEmailParams = {
+  from?: string;
+  to?: string | string[];
+  subject?: string;
+  text?: string;
+  html?: string;
+  cc?: string | string[];
+  bcc?: string | string[];
+};
 
 export const sendEmail = async ({
-  from = process.env.APP_EMAIL,
+  from = process.env.APP_EMAIL || "onboarding@resend.dev",
   to = "",
-  subject = "Saraha App 🔥",
+  subject = "Saraha App",
   text = "",
   html = "",
-  cc = [],
-  bcc = [],
-  attachments = [],
-}) => {
-  // nodemailer
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.APP_EMAIL,
-      pass: process.env.APP_PASSWORD,
-    },
-  });
+  cc,
+  bcc,
+}: SendEmailParams) => {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    throw new Error("RESEND_API_KEY is not configured");
+  }
+
+  const resend = new Resend(apiKey);
+  const recipients = Array.isArray(to) ? to : [to];
 
   try {
-    const info = await transporter.sendMail({
-      from: `"Saraha App " <${from}>`,
-      to,
+    const { data, error } = await resend.emails.send({
+      from: `Saraha App <${from}>`,
+      to: recipients,
       subject,
-      cc,
-      bcc,
-      text,
-      html,
-      attachments,
+      ...(html ? { html } : { text: text || " " }),
+      ...(cc ? { cc } : {}),
+      ...(bcc ? { bcc } : {}),
     });
-    console.log(`Email sent to ${to}: ${info.messageId}`);
-    return info;
+
+    if (error) {
+      console.error("Resend sendMail error:", error);
+      throw new Error(error.message || "Failed to send email");
+    }
+
+    console.log(`Email sent to ${recipients.join(", ")}: ${data?.id}`);
+    return data;
   } catch (error) {
-    console.error("Nodemailer sendMail error:", error);
+    console.error("Resend sendMail error:", error);
     throw error;
   }
 };

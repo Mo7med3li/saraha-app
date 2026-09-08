@@ -12,6 +12,10 @@ import rateLimit from "express-rate-limit";
 export const bootstrap = async (): Promise<void> => {
   const app: Express = express();
   const port = process.env.PORT || 5000;
+
+  // Required behind Railway / any reverse proxy (X-Forwarded-For)
+  app.set("trust proxy", 1);
+
   app.use(json());
 
   // to secure the headers
