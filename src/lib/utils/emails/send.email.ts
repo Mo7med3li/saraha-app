@@ -19,14 +19,21 @@ export const sendEmail = async ({
     },
   });
 
-  await transporter.sendMail({
-    from: `"Saraha App " <${from}>`, // sender address
-    to, // list of recipients
-    subject, // subject line
-    cc,
-    bcc,
-    text, // plain text body
-    html, // html body
-    attachments,
-  });
+  try {
+    const info = await transporter.sendMail({
+      from: `"Saraha App " <${from}>`,
+      to,
+      subject,
+      cc,
+      bcc,
+      text,
+      html,
+      attachments,
+    });
+    console.log(`Email sent to ${to}: ${info.messageId}`);
+    return info;
+  } catch (error) {
+    console.error("Nodemailer sendMail error:", error);
+    throw error;
+  }
 };

@@ -14,7 +14,7 @@ emailEvent.on("send-email", async (data) => {
       purpose: "verify your email",
     }),
   }).catch((error) => {
-    console.log(`failed to send email to ${data.to}`);
+    console.error(`failed to send email to ${data.to}:`, error);
   });
 });
 
@@ -29,7 +29,7 @@ emailEvent.on("send-email-forgot-password", async (data) => {
       purpose: "reset your password",
     }),
   }).catch((error) => {
-    console.log(`failed to send email to ${data.to}`);
+    console.error(`failed to send email to ${data.to}:`, error);
   });
 });
 export default emailEvent;
