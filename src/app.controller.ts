@@ -88,8 +88,8 @@ export const bootstrap = async (): Promise<void> => {
   });
   // error handler
   app.use(globalErrorHandler);
-  //   start the server
-  app.listen(port, () => {
+  // Railway requires binding to 0.0.0.0 (not localhost)
+  app.listen(Number(port), "0.0.0.0", () => {
     console.log(`Server is running on port ${port}`);
   });
 };
