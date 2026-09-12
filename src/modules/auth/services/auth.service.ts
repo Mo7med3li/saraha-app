@@ -175,7 +175,23 @@ export const googleLogin = asyncHandler(async (req, res, next) => {
     res,
     statusCode: 200,
     message: "Login successful",
-    data: { accessToken, refreshToken },
+    data: {
+      accessToken,
+      refreshToken,
+      user: {
+        _id: user._id,
+        userName: user.userName,
+        email: user.email,
+        gender: user.gender,
+        phoneNumber: user.phoneNumber,
+        confirmEmail: user.confirmEmail,
+        providers: user.providers,
+        profileImage: user.profileImage,
+        profileGallery: user.profileGallery,
+        role: user.role,
+        createdAt: user.createdAt,
+      },
+    },
   });
 });
 
