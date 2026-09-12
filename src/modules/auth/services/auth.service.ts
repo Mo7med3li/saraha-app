@@ -225,7 +225,23 @@ export const googleLoginOrSignup = asyncHandler(async (req, res, next) => {
     res,
     statusCode: 201,
     message: "Signup successful",
-    data: { accessToken, refreshToken },
+    data: {
+      accessToken,
+      refreshToken,
+      user: {
+        _id: newUser._id,
+        userName: newUser.userName,
+        email: newUser.email,
+        gender: newUser.gender,
+        phoneNumber: newUser.phoneNumber,
+        confirmEmail: newUser.confirmEmail,
+        providers: newUser.providers,
+        profileImage: newUser.profileImage,
+        profileGallery: newUser.profileGallery,
+        role: newUser.role,
+        createdAt: newUser.createdAt,
+      },
+    },
   });
 });
 
