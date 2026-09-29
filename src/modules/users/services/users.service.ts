@@ -49,9 +49,11 @@ export const getUserById = asyncHandler(
     if (!userWithMessages) {
       return next(new Error("User not found", { cause: 404 }));
     }
-    userWithMessages.phoneNumber = decryption({
-      cipherText: userWithMessages.phoneNumber,
-    });
+    if (userWithMessages.phoneNumber) {
+      userWithMessages.phoneNumber = decryption({
+        cipherText: userWithMessages.phoneNumber,
+      });
+    }
 
     return successResponse({
       res,
@@ -86,9 +88,11 @@ export const getUserSharedData = asyncHandler(
     if (!user) {
       return next(new Error("User not found", { cause: 404 }));
     }
-    user.phoneNumber = decryption({
-      cipherText: user.phoneNumber,
-    });
+    if (user.phoneNumber) {
+      user.phoneNumber = decryption({
+        cipherText: user.phoneNumber,
+      });
+    }
 
     return successResponse({
       res,
@@ -134,9 +138,11 @@ export const updateUserInfo = asyncHandler(
     if (!updatedUser) {
       return next(new Error("Failed to update user info", { cause: 400 }));
     }
-    updatedUser.phoneNumber = decryption({
-      cipherText: updatedUser.phoneNumber,
-    });
+    if (updatedUser.phoneNumber) {
+      updatedUser.phoneNumber = decryption({
+        cipherText: updatedUser.phoneNumber,
+      });
+    }
 
     return successResponse({
       res,
