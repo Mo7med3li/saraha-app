@@ -389,54 +389,135 @@ export const profileImageUpload = asyncHandler(
   },
 );
 
+// export const profileGalleryUpload = asyncHandler(
+//   async (req: Request, res: Response, next: NextFunction) => {
+//     const user = requireAuthUser(req);
+//     const files = getUploadedFiles(req);
+//     if (!files.length) {
+//       return next(new Error("No images uploaded", { cause: 400 }));
+//     }
+
+//     const uploadedFiles = await cloudfilesupload({
+//       files,
+//       folder: `users/${user._id}/profile-gallery-images`,
+//     });
+//     if (uploadedFiles.length === 0) {
+//       return next(
+//         new Error("Failed to upload profile gallery images", { cause: 400 }),
+//       );
+//     }
+
+//     const updatedUser = await findAndUpdate({
+//       model: UserModel,
+//       filters: { _id: user._id },
+//       data: { profileGallery: uploadedFiles },
+//       select: "-password -confirmEmailOtpAttempts -oldPasswords",
+//       options: { new: false },
+//     });
+//     if (!updatedUser) {
+//       return next(
+//         new Error("Failed to update profile gallery", { cause: 400 }),
+//       );
+//     }
+//     if (updatedUser.profileGallery.length > 0) {
+//       const deleted = await cloudResourceDelete({
+//         asset_ids: updatedUser.profileGallery.map(
+//           (file: { asset_id: string }) => file.asset_id,
+//         ),
+//       });
+//       if (!deleted) {
+//         return next(
+//           new Error("Failed to delete previous profile gallery images", {
+//             cause: 400,
+//           }),
+//         );
+//       }
+//     }
+//     return successResponse({
+//       res,
+//       statusCode: 200,
+//       message: "Profile gallery uploaded successfully",
+//     });
+//   },
+// );
+
 export const profileGalleryUpload = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const user = requireAuthUser(req);
     const files = getUploadedFiles(req);
-    if (!files.length) {
-      return next(new Error("No images uploaded", { cause: 400 }));
+
+    // Existing images the frontend wants to KEEP, identified by imageUrl.
+    // Sent as repeated form fields: existingImages=<url1>&existingImages=<url2>...
+    const existingImageUrls: string[] = req.body.existingImages
+      ? Array.isArray(req.body.existingImages)
+        ? req.body.existingImages
+        : [req.body.existingImages]
+      : [];
+
+    if (!files.length && existingImageUrls.length === 0) {
+      return next(new Error("No images provided", { cause: 400 }));
     }
 
-    const uploadedFiles = await cloudfilesupload({
-      files,
-      folder: `users/${user._id}/profile-gallery-images`,
-    });
-    if (uploadedFiles.length === 0) {
-      return next(
-        new Error("Failed to upload profile gallery images", { cause: 400 }),
-      );
+    // Upload any new files
+    let uploadedFiles: { asset_id: string; imageUrl: string }[] = [];
+    if (files.length > 0) {
+      uploadedFiles = await cloudfilesupload({
+        files,
+        folder: `users/${user._id}/profile-gallery-images`,
+      });
+      if (uploadedFiles.length === 0) {
+        return next(
+          new Error("Failed to upload profile gallery images", { cause: 400 }),
+        );
+      }
     }
+
+    // Figure out which currently-stored images the user is keeping
+    const currentGallery = user.profileGallery ?? [];
+    const keptImages = currentGallery.filter((img: { imageUrl: string }) =>
+      existingImageUrls.includes(img.imageUrl),
+    );
+
+    // Anything in the current gallery NOT in the keep list must be deleted
+    const imagesToDelete = currentGallery.filter(
+      (img: { imageUrl: string }) => !existingImageUrls.includes(img.imageUrl),
+    );
+
+    const newGallery = [...keptImages, ...uploadedFiles];
 
     const updatedUser = await findAndUpdate({
       model: UserModel,
       filters: { _id: user._id },
-      data: { profileGallery: uploadedFiles },
+      data: { profileGallery: newGallery },
       select: "-password -confirmEmailOtpAttempts -oldPasswords",
-      options: { new: false },
+      options: { new: true },
     });
     if (!updatedUser) {
       return next(
         new Error("Failed to update profile gallery", { cause: 400 }),
       );
     }
-    if (updatedUser.profileGallery.length > 0) {
+
+    if (imagesToDelete.length > 0) {
       const deleted = await cloudResourceDelete({
-        asset_ids: updatedUser.profileGallery.map(
-          (file: { asset_id: string }) => file.asset_id,
+        asset_ids: imagesToDelete.map(
+          (img: { asset_id: string }) => img.asset_id,
         ),
       });
       if (!deleted) {
         return next(
-          new Error("Failed to delete previous profile gallery images", {
+          new Error("Failed to delete removed profile gallery images", {
             cause: 400,
           }),
         );
       }
     }
+
     return successResponse({
       res,
       statusCode: 200,
       message: "Profile gallery uploaded successfully",
+      data: updatedUser,
     });
   },
 );
