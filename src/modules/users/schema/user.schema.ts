@@ -95,9 +95,14 @@ export const profileGallerySchema = {
           path: generalFieldsSchema.file.path,
           size: generalFieldsSchema.file.size,
         })
-        .required(),
+        .optional(),
     )
     .min(1)
     .max(10)
     .required(),
+  body: Joi.object().keys({
+    existingImages: Joi.alternatives()
+      .try(Joi.string().uri(), Joi.array().items(Joi.string().uri()).max(10))
+      .optional(),
+  }),
 };
