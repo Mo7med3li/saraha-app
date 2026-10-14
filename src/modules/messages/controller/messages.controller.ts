@@ -1,9 +1,5 @@
 import { Router } from "express";
-import {
-  createMessage,
-  createReplyMessage,
-  listMessages,
-} from "../services/message.service";
+import { createMessage, createReplyMessage } from "../services/message.service";
 import { cloudinaryFileUpload } from "../../../lib/utils/multer/cloud.multer";
 import { FILE_FILTER_VALIDATION } from "../../../lib/constants/constants";
 import { validationMiddleware } from "../../../middleware/validation.middleware";
@@ -46,7 +42,5 @@ messagesRouter.post(
   validationMiddleware(createReplyMessageSchema),
   createReplyMessage,
 );
-
-messagesRouter.get("/", listMessages);
 
 export default messagesRouter;

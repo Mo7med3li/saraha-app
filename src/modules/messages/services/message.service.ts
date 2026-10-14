@@ -1,8 +1,11 @@
-import { createOne, findAll, findOne } from "../../../db/db.service";
+import { createOne, findOne } from "../../../db/db.service";
 import MessageModel from "../../../db/models/message.model";
 import UserModel from "../../../db/models/user.model";
 import { cloudfilesupload } from "../../../lib/utils/multer/cloudinary";
-import { getUploadedFiles, requireAuthUser } from "../../../lib/utils/request";
+import {
+  getUploadedFiles,
+  requireAuthUser,
+} from "../../../lib/utils/request";
 import { asyncHandler, successResponse } from "../../../lib/utils/response";
 import type { Request } from "express";
 
@@ -130,36 +133,3 @@ export const createReplyMessage = asyncHandler(async (req, res, next) => {
     statusCode: 201,
   });
 });
-
-export const listMessages = asyncHandler(async (req, res, next) => {
-  const messages = await findAll({
-    model: MessageModel,
-    populate: [
-      {
-        path: "senderId",
-        select: "firstName lastName profileImage",
-      },
-      {
-        path: "receiverId",
-        select: "firstName lastName profileImage",
-      },
-    ],
-  });
-  return successResponse({
-    res,
-    message: "Messages listed successfully",
-    data: messages,
-    statusCode: 200,
-  });
-});
-
-// export const listMessagesByReceiverId = asyncHandler(async (req, res, next) => {
-//   const user = requireAuthUser(req);
-//   const { receiverId } = req.params;
-//   const messages = await findAll({
-//     model: MessageModel,
-//     filters: {
-//       receiverId: user._id,
-//     },
-//   });
-// });

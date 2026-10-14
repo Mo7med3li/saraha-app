@@ -108,23 +108,9 @@ export const findAndUpdate = async ({
 export const deleteOne = async ({
   model,
   filters = {},
-  options = {},
 }: {
   model: Model<any>;
   filters?: Record<string, any>;
-  options?: Record<string, any>;
 }) => {
-  return await model.deleteOne(filters, options);
-};
-
-export const deleteMany = async ({
-  model,
-  filters = {},
-  options = {},
-}: {
-  model: Model<any>;
-  filters?: Record<string, any>;
-  options?: Record<string, any>;
-}) => {
-  return await model.deleteMany(filters);
+  return await model.deleteOne(filters);
 };

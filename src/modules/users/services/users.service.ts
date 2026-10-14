@@ -1,13 +1,12 @@
 import type { NextFunction, Request, Response } from "express";
 import {
-  deleteMany,
   deleteOne,
   findAndUpdate,
   findById,
   findOne,
   updateOne,
 } from "../../../db/db.service";
-
+import UserModel from "../../../db/models/user.model";
 import { LOGOUT_ENUM, ROLES_ENUM } from "../../../lib/constants/constants";
 import {
   cloudDeleteFolderByPrefix,
@@ -34,8 +33,6 @@ import {
   requireAuthUser,
   requireDecodedToken,
 } from "../../../lib/utils/request";
-import { MessageModel, UserModel } from "../../../db/models/index";
-import mongoose from "mongoose";
 
 // Get user by ID service
 export const getUserById = asyncHandler(
@@ -246,28 +243,11 @@ export const restoreAccount = asyncHandler(
 export const deleteAccount = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
-    // start session
-    const session = await mongoose.startSession();
-    req.session = session;
 
-    // start transaction
-    session.startTransaction();
     const deletedUser = await deleteOne({
       model: UserModel,
       filters: { _id: id, deletedAt: { $exists: true } },
-      options: { session },
     });
-    await deleteMany({
-      model: MessageModel,
-      filters: { receiverId: id },
-      options: { session },
-    });
-
-    // commit transaction
-    await session.commitTransaction();
-    // end session
-    await session.endSession();
-
     if (!deletedUser.deletedCount) {
       return next(
         new Error("Failed to delete account or account not freezed", {
