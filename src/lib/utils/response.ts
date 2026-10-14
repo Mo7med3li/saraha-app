@@ -19,12 +19,18 @@ export const asyncHandler = (
   };
 };
 
-export const globalErrorHandler = (
+export const globalErrorHandler = async (
   err: Error,
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
+  if (req.session && req.session.inTransaction()) {
+    // rollback transaction
+    await req.session.abortTransaction();
+    // end session
+    await req.session.endSession();
+  }
   return res.status((err.cause as number) || 400).json({
     success: false,
     message: err.message,

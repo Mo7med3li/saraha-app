@@ -6,7 +6,7 @@ import {
   SIGNATURE_LEVEL_LABEL,
   TOKEN_TYPES_ENUM,
 } from "../../constants/constants";
-import { nanoid } from "nanoid";
+import { randomUUID } from "node:crypto";
 import TokenModel from "../../../db/models/token.model";
 import type { NextFunction } from "express";
 import type { AuthJwtPayload } from "../../../types/express";
@@ -116,7 +116,7 @@ export const generateTokens = async ({ user }: { user: Record<string, any> }) =>
   const { accessSignature, refreshSignature } = getSignature({
     bearer: signatureLevel,
   });
-  const jwtid = nanoid();
+  const jwtid = randomUUID();
   const token = generateToken({
     payload: { _id: user._id },
     signature: accessSignature as string,

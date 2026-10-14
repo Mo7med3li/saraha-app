@@ -70,9 +70,7 @@ messageSchema.virtual("replies", {
 messageSchema.index({ parentMessageId: 1 });
 messageSchema.index({ receiverId: 1, createdAt: -1 });
 
-const MessageModel =
+export const MessageModel =
   Mongoose.models.Message || Mongoose.model("Message", messageSchema);
 
 MessageModel.syncIndexes();
-
-export default MessageModel;

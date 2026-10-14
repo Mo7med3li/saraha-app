@@ -20,9 +20,7 @@ const tokenSchema = new Mongoose.Schema(
   { timestamps: true },
 );
 
-const TokenModel =
+export const TokenModel =
   Mongoose.models.Token || Mongoose.model("Token", tokenSchema);
 
 TokenModel.syncIndexes();
-
-export default TokenModel;

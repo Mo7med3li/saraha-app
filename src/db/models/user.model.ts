@@ -132,17 +132,16 @@ userSchema
 userSchema.virtual("messages", {
   ref: "Message",
   localField: "_id",
-  foreignField: "senderId",
+  foreignField: "receiverId",
 });
 userSchema.index(
   { firstName: 1, lastName: 1 },
   { unique: true, name: "fullName_index" },
 );
-const UserModel = Mongoose.models.User || Mongoose.model("User", userSchema);
+export const UserModel =
+  Mongoose.models.User || Mongoose.model("User", userSchema);
 
 UserModel.syncIndexes();
-
-export default UserModel;
 
 export interface IUser extends Mongoose.Document {
   _id: Mongoose.Types.ObjectId;

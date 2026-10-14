@@ -1,6 +1,6 @@
 import { OAuth2Client } from "google-auth-library";
 import { createOne, findOne, updateOne } from "../../../db/db.service.js";
-import UserModel from "../../../db/models/user.model.js";
+
 import { asyncHandler, successResponse } from "../../../lib/utils/response.js";
 import { encryption } from "../../../lib/utils/security/encryption.security.js";
 import {
@@ -13,7 +13,8 @@ import {
   sendConfirmEmail,
   sendForgotPasswordEmail,
 } from "../../../lib/utils/emails/otp.email.js";
-import { customAlphabet } from "nanoid";
+import { randomInt } from "node:crypto";
+import { UserModel } from "../../../db/models/index";
 
 const OTP_MAX_ATTEMPTS = 5;
 const OTP_BLOCK_MS = 1000 * 60 * 5;
@@ -37,7 +38,7 @@ export const signup = asyncHandler(async (req, res, next) => {
   const encryptedPhoneNumber = encryption({
     plainText: phoneNumber,
   });
-  const otp = customAlphabet("0123456789", 6)();
+  const otp = String(randomInt(0, 1_000_000)).padStart(6, "0");
   const confirmEmailOtp = await generateHash({ plainText: otp });
   //   Create user
   const [user] = await createOne({
@@ -366,7 +367,7 @@ export const resendConfirmEmail = asyncHandler(async (req, res, next) => {
       : user.confirmEmailOtpAttempts || 0;
   const nextAttempts = previousAttempts + 1;
 
-  const otp = customAlphabet("0123456789", 6)();
+  const otp = String(randomInt(0, 1_000_000)).padStart(6, "0");
   const confirmEmailOtp = await generateHash({ plainText: otp });
 
   const data: Record<string, unknown> = {
@@ -464,7 +465,7 @@ export const sendForgotPasswordOtp = asyncHandler(async (req, res, next) => {
       : user.forgotPasswordOtpAttempts || 0;
   const nextAttempts = previousAttempts + 1;
 
-  const otp = customAlphabet("0123456789", 6)();
+  const otp = String(randomInt(0, 1_000_000)).padStart(6, "0");
   const forgotPasswordOtp = generateHash({ plainText: otp });
 
   const data: Record<string, unknown> = {
