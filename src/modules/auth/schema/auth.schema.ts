@@ -56,6 +56,11 @@ export const resetPasswordSchema = {
     email: generalFieldsSchema.email.required(),
     otp: generalFieldsSchema.otp.required(),
     newPassword: generalFieldsSchema.password.required(),
-    confirmPassword: generalFieldsSchema.confirmPassword.required(),
+    confirmPassword: Joi.string()
+      .valid(Joi.ref("newPassword"))
+      .messages({
+        "any.only": "Password and confirm password do not match",
+      })
+      .required(),
   }),
 };
