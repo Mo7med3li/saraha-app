@@ -92,8 +92,14 @@ export const bootstrap = async (): Promise<void> => {
   });
   // error handler
   app.use(globalErrorHandler);
+
+  // For Vercel serverless deployment - export the app
+  if (process.env.VERCEL) {
+    module.exports = app;
+  } else {
   // Railway requires binding to 0.0.0.0 (not localhost)
   app.listen(Number(port), "0.0.0.0", () => {
     console.log(`Server is running on port ${port}`);
   });
+  }
 };
