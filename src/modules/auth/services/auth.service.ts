@@ -14,7 +14,7 @@ import {
   sendForgotPasswordEmail,
 } from "../../../lib/utils/emails/otp.email.js";
 import { randomInt } from "node:crypto";
-import { UserModel } from "../../../db/models/index";
+import UserModel from "../../../db/models/user.model.js";
 
 const OTP_MAX_ATTEMPTS = 5;
 const OTP_BLOCK_MS = 1000 * 60 * 5;
