@@ -2,7 +2,10 @@ import { OAuth2Client } from "google-auth-library";
 import { createOne, findOne, updateOne } from "../../../db/db.service.js";
 
 import { asyncHandler, successResponse } from "../../../lib/utils/response.js";
-import { encryption } from "../../../lib/utils/security/encryption.security.js";
+import {
+  decryption,
+  encryption,
+} from "../../../lib/utils/security/encryption.security.js";
 import {
   compareHash,
   generateHash,
@@ -126,7 +129,9 @@ export const login = asyncHandler(async (req, res, next) => {
         userName: user.userName,
         email: user.email,
         gender: user.gender,
-        phoneNumber: user.phoneNumber,
+        phoneNumber: decryption({
+          cipherText: user.phoneNumber,
+        }),
         confirmEmail: user.confirmEmail,
         providers: user.providers,
         profileImage: user.profileImage,

@@ -15,6 +15,7 @@ import {
   refreshToken,
   profileImageUpload,
   profileGalleryUpload,
+  getAllUsers,
 } from "../services/users.service";
 import { authorize } from "../../../authorize/authorize";
 import {
@@ -53,6 +54,12 @@ usersRouter.get(
   validationMiddleware(refreshTokenSchema),
   authMiddleware({ tokenType: TOKEN_TYPES_ENUM.REFRESH }),
   refreshToken,
+);
+usersRouter.get(
+  "/all",
+  authMiddleware(),
+  authorizeMiddleware({ roles: authorize.getAllUsers as string[] }),
+  getAllUsers,
 );
 usersRouter.get(
   "/:id",

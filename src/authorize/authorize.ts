@@ -4,4 +4,5 @@ export const authorize = {
   profile: [ROLES_ENUM.USER, ROLES_ENUM.ADMIN],
   restoreAccount: [ROLES_ENUM.ADMIN],
   deleteAccount: [ROLES_ENUM.ADMIN],
+  getAllUsers: [ROLES_ENUM.ADMIN],
 };

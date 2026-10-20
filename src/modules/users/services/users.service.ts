@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import {
   deleteOne,
+  findAll,
   findAndUpdate,
   findById,
   findOne,
@@ -544,3 +545,23 @@ export const profileGalleryUpload = asyncHandler(
 //     });
 //   },
 // );
+
+export const getAllUsers = asyncHandler(async (req, res, next) => {
+  const users = await findAll({
+    model: UserModel,
+    select:
+      "-password -confirmEmailOtpAttempts -oldPasswords -changeCredentialsTime",
+  });
+  const usersWithPhoneNumbers = users.map((user) => {
+    user.phoneNumber = decryption({
+      cipherText: user.phoneNumber,
+    });
+    return user;
+  });
+  return successResponse({
+    res,
+    statusCode: 200,
+    message: "Users retrieved successfully",
+    data: usersWithPhoneNumbers,
+  });
+});
