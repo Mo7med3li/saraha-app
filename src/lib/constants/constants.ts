@@ -29,9 +29,22 @@ export const LOGOUT_ENUM = {
   STAY_LOGGED_IN: "stayLoggedIn",
 };
 
+export const FILE_TYPES_ENUM = {
+  IMAGE: "image",
+  DOCUMENT: "document",
+  VIDEO: "video",
+  AUDIO: "audio",
+  APPLICATION: "application",
+};
+
 export const FILE_FILTER_VALIDATION = {
-  image: ["image/jpeg", "image/png", "image/jpg", "image/webp"],
-  document: [
+  [FILE_TYPES_ENUM.IMAGE]: [
+    "image/jpeg",
+    "image/png",
+    "image/jpg",
+    "image/webp",
+  ],
+  [FILE_TYPES_ENUM.DOCUMENT]: [
     "application/pdf",
     "application/msword",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",

@@ -132,7 +132,7 @@ userSchema
 userSchema.virtual("messages", {
   ref: "Message",
   localField: "_id",
-  foreignField: "senderId",
+  foreignField: "receiverId",
 });
 userSchema.index(
   { firstName: 1, lastName: 1 },

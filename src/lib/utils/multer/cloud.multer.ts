@@ -4,12 +4,12 @@ import multer from "multer";
 export const cloudinaryFileUpload = ({
   filterValidation = [],
 }: {
-  filterValidation: string[];
+  filterValidation: string[] | undefined;
 }) => {
   const storage = multer.diskStorage({});
 
   const fileFilter = function (req: Request, file: any, callback: any) {
-    if (filterValidation.includes(file.mimetype)) {
+    if (filterValidation?.includes(file.mimetype)) {
       return callback(null, true);
     }
     return callback(
