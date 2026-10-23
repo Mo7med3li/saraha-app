@@ -38,17 +38,29 @@ export const findAll = async ({
   model,
   filters = {},
   select = "",
+  sort = {},
   populate = [],
+  limit,
+  skip,
 }: {
   model: Model<any>;
   filters?: Record<string, any>;
   select?: string;
   populate?: PopulateOptions | PopulateOptions[] | Record<string, unknown>;
+  sort?: Record<string, any>;
+  limit?: number;
+  skip?: number;
 }) => {
-  return await model
+  const query = model
     .find(filters)
     .select(select)
-    .populate(populate as PopulateOptions[]);
+    .populate(populate as PopulateOptions[])
+    .sort(sort);
+
+  if (limit) query.limit(limit);
+  if (skip) query.skip(skip);
+
+  return await query;
 };
 
 export const createOne = async ({
@@ -113,4 +125,14 @@ export const deleteOne = async ({
   filters?: Record<string, any>;
 }) => {
   return await model.deleteOne(filters);
+};
+
+export const countDocuments = async ({
+  model,
+  filters = {},
+}: {
+  model: Model<any>;
+  filters?: Record<string, any>;
+}) => {
+  return await model.countDocuments(filters);
 };
