@@ -1,11 +1,13 @@
-import { createOne, findOne } from "../../../db/db.service";
+import {
+  countDocuments,
+  createOne,
+  findAll,
+  findOne,
+} from "../../../db/db.service";
 import MessageModel from "../../../db/models/message.model";
 import UserModel from "../../../db/models/user.model";
 import { cloudfilesupload } from "../../../lib/utils/multer/cloudinary";
-import {
-  getUploadedFiles,
-  requireAuthUser,
-} from "../../../lib/utils/request";
+import { getUploadedFiles, requireAuthUser } from "../../../lib/utils/request";
 import { asyncHandler, successResponse } from "../../../lib/utils/response";
 import type { Request } from "express";
 
@@ -131,5 +133,49 @@ export const createReplyMessage = asyncHandler(async (req, res, next) => {
     message: "Reply message created successfully",
     data: replyMessage,
     statusCode: 201,
+  });
+});
+
+export const getMessagesByUserId = asyncHandler(async (req, res, next) => {
+  const user = requireAuthUser(req);
+  const { userId } = req.params;
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 10;
+  const skip = (page - 1) * limit;
+
+  if (user._id.toString() !== userId) {
+    return next(
+      new Error("You are not authorized to view these messages", {
+        cause: 403,
+      }),
+    );
+  }
+
+  const [messages, total] = await Promise.all([
+    findAll({
+      model: MessageModel,
+      filters: {
+        receiverId: userId,
+      },
+      sort: { createdAt: -1 },
+      populate: [{ path: "sender" }],
+      limit,
+      skip,
+    }),
+    countDocuments({
+      model: MessageModel,
+      filters: {
+        receiverId: userId,
+      },
+    }),
+  ]);
+
+  const totalPages = Math.ceil(total / limit);
+
+  return successResponse({
+    res,
+    statusCode: 200,
+    message: "Messages retrieved successfully",
+    data: { messages, page, limit, total, totalPages },
   });
 });

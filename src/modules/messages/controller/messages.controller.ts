@@ -1,13 +1,17 @@
 import { Router } from "express";
-import { createMessage, createReplyMessage } from "../services/message.service";
-import { cloudinaryFileUpload } from "../../../lib/utils/multer/cloud.multer";
 import { FILE_FILTER_VALIDATION } from "../../../lib/constants/constants";
+import { cloudinaryFileUpload } from "../../../lib/utils/multer/cloud.multer";
+import { authMiddleware } from "../../../middleware/authentication.middleware";
 import { validationMiddleware } from "../../../middleware/validation.middleware";
 import {
   createMessageSchema,
   createReplyMessageSchema,
 } from "../schema/message.schema";
-import { authMiddleware } from "../../../middleware/authentication.middleware";
+import {
+  createMessage,
+  createReplyMessage,
+  getMessagesByUserId,
+} from "../services/message.service";
 
 const messagesRouter = Router({
   caseSensitive: true,
@@ -42,5 +46,7 @@ messagesRouter.post(
   validationMiddleware(createReplyMessageSchema),
   createReplyMessage,
 );
+
+messagesRouter.get("/:userId", authMiddleware(), getMessagesByUserId);
 
 export default messagesRouter;
