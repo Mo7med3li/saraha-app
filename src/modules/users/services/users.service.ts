@@ -8,7 +8,11 @@ import {
   updateOne,
 } from "../../../db/db.service";
 import UserModel from "../../../db/models/user.model";
-import { LOGOUT_ENUM, ROLES_ENUM } from "../../../lib/constants/constants";
+import {
+  LOGOUT_ENUM,
+  PROVIDERS_ENUM,
+  ROLES_ENUM,
+} from "../../../lib/constants/constants";
 import {
   cloudDeleteFolderByPrefix,
   cloudFileDelete,
@@ -270,6 +274,16 @@ export const deleteAccount = asyncHandler(
 export const updatePassword = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const user = requireAuthUser(req);
+
+    if (user.providers === PROVIDERS_ENUM.GOOGLE) {
+      return next(
+        new Error(
+          "Google accounts sign in with Google. Password cannot be changed here.",
+          { cause: 400 },
+        ),
+      );
+    }
+
     const { oldPassword, password, flag } = req.body;
     let updatedData: Record<string, unknown> = {};
     if (!compareHash({ plainText: oldPassword, hash: user.password })) {
