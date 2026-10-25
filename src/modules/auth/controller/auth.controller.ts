@@ -32,6 +32,7 @@ const authRouter = Router({
  *   post:
  *     summary: Register a new user
  *     tags: [Authentication]
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:
@@ -95,6 +96,7 @@ authRouter.post("/signup", validationMiddleware(signupSchema), signup);
  *   patch:
  *     summary: Confirm email with OTP
  *     tags: [Authentication]
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:
@@ -130,6 +132,7 @@ authRouter.patch(
  *   patch:
  *     summary: Resend email confirmation OTP
  *     tags: [Authentication]
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:
@@ -161,6 +164,7 @@ authRouter.patch(
  *   post:
  *     summary: Login user
  *     tags: [Authentication]
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:
@@ -183,23 +187,13 @@ authRouter.patch(
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                 data:
- *                   type: object
- *                   properties:
- *                     accessToken:
- *                       type: string
- *                     refreshToken:
- *                       type: string
- *                     user:
- *                       type: object
+ *               $ref: "#/components/schemas/LoginSuccessResponse"
  *       400:
- *         description: Invalid credentials or account frozen
+ *         $ref: "#/components/responses/ValidationError"
+ *       401:
+ *         $ref: "#/components/responses/Unauthorized"
  *       404:
- *         description: User not found
+ *         $ref: "#/components/responses/NotFound"
  */
 authRouter.post("/login", validationMiddleware(loginSchema), login);
 /**
@@ -208,6 +202,7 @@ authRouter.post("/login", validationMiddleware(loginSchema), login);
  *   post:
  *     summary: Sign up or login with Google
  *     tags: [Authentication]
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:
@@ -253,6 +248,7 @@ authRouter.post(
  *   patch:
  *     summary: Send OTP for password reset
  *     tags: [Authentication]
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:
@@ -284,6 +280,7 @@ authRouter.patch(
  *   patch:
  *     summary: Verify OTP for password reset
  *     tags: [Authentication]
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:
@@ -319,6 +316,7 @@ authRouter.patch(
  *   patch:
  *     summary: Reset password with verified OTP
  *     tags: [Authentication]
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:
@@ -361,6 +359,7 @@ authRouter.patch(
  *   post:
  *     summary: Login with Google (existing users only)
  *     tags: [Authentication]
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:

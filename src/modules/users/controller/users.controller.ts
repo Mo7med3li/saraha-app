@@ -50,6 +50,7 @@ const usersRouter: Router = Router({
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
+ *       - systemAuth: []
  *     responses:
  *       200:
  *         description: User profile retrieved successfully
@@ -85,6 +86,7 @@ usersRouter.get(
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
+ *       - systemAuth: []
  *     responses:
  *       200:
  *         description: Token refreshed successfully
@@ -119,6 +121,7 @@ usersRouter.get(
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
+ *       - systemAuth: []
  *     responses:
  *       200:
  *         description: All users retrieved successfully
@@ -192,6 +195,7 @@ usersRouter.get(
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
+ *       - systemAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -245,6 +249,7 @@ usersRouter.patch(
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
+ *       - systemAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -295,6 +300,7 @@ usersRouter.patch(
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
+ *       - systemAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -329,6 +335,7 @@ usersRouter.post(
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
+ *       - systemAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -372,6 +379,7 @@ usersRouter.delete(
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
+ *       - systemAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -416,6 +424,7 @@ usersRouter.patch(
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
+ *       - systemAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -449,6 +458,7 @@ usersRouter.delete(
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
+ *       - systemAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -488,6 +498,7 @@ usersRouter.patch(
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
+ *       - systemAuth: []
  *     requestBody:
  *       required: true
  *       content:

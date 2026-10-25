@@ -85,6 +85,7 @@ messagesRouter.post(
  *     tags: [Messages]
  *     security:
  *       - bearerAuth: []
+ *       - systemAuth: []
  *     parameters:
  *       - in: path
  *         name: receiverId
@@ -149,6 +150,7 @@ messagesRouter.post(
  *     tags: [Messages]
  *     security:
  *       - bearerAuth: []
+ *       - systemAuth: []
  *     parameters:
  *       - in: path
  *         name: messageId
@@ -213,6 +215,7 @@ messagesRouter.post(
  *     tags: [Messages]
  *     security:
  *       - bearerAuth: []
+ *       - systemAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
