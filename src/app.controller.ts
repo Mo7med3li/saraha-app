@@ -9,6 +9,7 @@ import { resolve } from "path";
 import morgan from "morgan";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import { setupSwagger } from "./lib/utils/swagger/setup-swagger";
 export const bootstrap = async (): Promise<void> => {
   const app: Express = express();
   const port = process.env.PORT || 5000;
@@ -18,8 +19,13 @@ export const bootstrap = async (): Promise<void> => {
 
   app.use(json());
 
-  // to secure the headers
-  app.use(helmet());
+  // Secure headers — relax CSP so Swagger UI assets can load
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+      crossOriginEmbedderPolicy: false,
+    }),
+  );
 
   const limiter = rateLimit({
     windowMs: 60 * 60 * 1000, // 1 hour
@@ -66,10 +72,10 @@ export const bootstrap = async (): Promise<void> => {
 
   // serve static files
   app.use("/uploads", express.static(resolve("./src/uploads")));
-  //   root route
-  app.get("/", (req, res) => {
-    res.json({ message: "welcome to the application" });
-  });
+
+  // Swagger UI — must be registered before the 404 catch-all
+  setupSwagger(app);
+
   // connect to database
   connectionMongoDB();
 

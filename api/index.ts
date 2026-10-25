@@ -14,12 +14,18 @@ import { globalErrorHandler } from "../src/lib/utils/response";
 import authRouter from "../src/modules/auth/controller/auth.controller";
 import messagesRouter from "../src/modules/messages/controller/messages.controller";
 import userRouter from "../src/modules/users/controller/users.controller";
+import { setupSwagger } from "../src/lib/utils/swagger/setup-swagger";
 
 const app: Express = express();
 
 app.set("trust proxy", 1);
 app.use(json());
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+  }),
+);
 
 const limiter = rateLimit({
   windowMs: 60 * 60 * 1000,
@@ -33,11 +39,14 @@ app.use(cors());
 
 app.use("/uploads", express.static(resolve("./src/uploads")));
 
+connectionMongoDB();
+
+// Swagger must be before the 404 catch-all (was missing here → "route not found")
+setupSwagger(app);
+
 app.get("/", (req, res) => {
   res.json({ message: "welcome to the application" });
 });
-
-connectionMongoDB();
 
 app.use("/auth", authRouter);
 app.use("/users", userRouter);
